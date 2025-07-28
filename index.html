@@ -1,0 +1,2868 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi LSTARS - Fakultas Teknik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* a lighter slate-100 */
+            overflow-x: hidden; /* Prevent horizontal scroll when sidebar is off-canvas */
+        }
+        .main-content {
+            display: none;
+        }
+        .main-content.active {
+            display: block;
+        }
+        .sidebar-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+            transform: translateX(4px);
+        }
+        .form-input {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500;
+        }
+        .btn {
+            @apply px-4 py-2 rounded-md font-semibold text-white shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2;
+        }
+        .btn-sm {
+            @apply px-2 py-1 text-xs rounded-md font-semibold text-white shadow-sm transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-1;
+        }
+        .btn-primary {
+            @apply bg-sky-600 hover:bg-sky-700 focus:ring-sky-500;
+        }
+        .btn-secondary {
+            @apply bg-gray-600 hover:bg-gray-700 focus:ring-gray-500;
+        }
+        .btn-success {
+            @apply bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500;
+        }
+        .btn-danger {
+            @apply bg-red-600 hover:bg-red-700 focus:ring-red-500;
+        }
+        .card {
+            @apply bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300;
+        }
+        /* GAYA BARU UNTUK BERANDA */
+        .hero-bg {
+            background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .quick-access-card {
+            /* KEPT FOR OVERRIDE */
+            @apply block; /* Overwritten by more specific styles below */
+        }
+
+        /* Custom modal styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 90%;
+            max-width: 500px;
+            z-index: 50;
+        }
+        /* Timeline Styles */
+        .timeline-container {
+            position: relative;
+            padding-left: 2.5rem; /* 40px */
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 1rem;
+            bottom: 1rem;
+            width: 4px;
+            background-color: #e2e8f0; /* slate-200 */
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            transform: translateX(-45%);
+            background-color: #f0f4f8; /* body bg */
+            padding: 4px;
+            color: #0ea5e9; /* sky-500 */
+        }
+        .timeline-card {
+            margin-left: 1rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .timeline-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        .timeline-card-time {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            color: #475569; /* slate-600 */
+        }
+        .timeline-card-body {
+            color: #334155; /* slate-700 */
+            white-space: pre-wrap; /* Preserve line breaks from textarea */
+            word-break: break-word;
+        }
+        /* MODIFIED Kategori Filter Styles */
+        .kategori-filter-btn {
+            @apply px-4 py-2 rounded-md text-sm font-semibold border-2 cursor-pointer transition-all duration-200 flex items-center justify-center;
+        }
+        .kategori-filter-btn.active {
+            @apply bg-sky-600 text-white border-sky-600 shadow-md;
+        }
+        .kategori-filter-btn:not(.active) {
+            @apply bg-white text-slate-700 border-slate-300 hover:border-sky-500 hover:bg-sky-50 hover:text-sky-600;
+        }
+        /* Dokumentasi Styles */
+        .doc-card-image-wrapper {
+            @apply relative overflow-hidden rounded-lg;
+        }
+        .doc-card-overlay {
+            @apply absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white p-4 text-center opacity-0 transition-opacity duration-300;
+        }
+        .doc-card:hover .doc-card-overlay {
+            @apply opacity-100;
+        }
+        .loader {
+            @apply w-12 h-12 border-4 border-t-sky-500 border-gray-200 rounded-full animate-spin;
+        }
+
+        /* === Tambahan untuk menghilangkan hover daftar asisten === */
+        #asisten-list-container > div:hover {
+            background-color: transparent !important;
+            cursor: default !important;
+            transform: none !important;
+        }
+
+        /* === GAYA BARU UNTUK TAB PROFIL DOSEN === */
+        .tab-btn {
+            @apply px-4 py-2 font-semibold text-slate-500 border-b-2 border-transparent hover:border-sky-500 hover:text-sky-600 transition-colors duration-200;
+        }
+        .tab-btn.active {
+            @apply border-sky-500 text-sky-600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* === [BARU] Animasi untuk login gagal === */
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .shake-animation {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* === [BARU] CSS untuk Kalender Presensi === */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        .calendar-day-name {
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #475569; /* slate-600 */
+        }
+        .day-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 2.5rem;
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.875rem;
+            color: #334155; /* slate-700 */
+            transition: all 0.2s;
+        }
+        .day-cell.other-month {
+            color: #94a3b8; /* slate-400 */
+        }
+        .day-cell.today {
+            background-color: #e0f2fe; /* sky-100 */
+            font-weight: 700;
+            color: #0284c7; /* sky-600 */
+        }
+        .day-cell.hadir {
+            background-color: #d1fae5; /* emerald-200 */
+            color: #065f46; /* emerald-800 */
+            font-weight: 600;
+        }
+        .day-cell.izin {
+            background-color: #fef3c7; /* amber-200 */
+            color: #92400e; /* amber-800 */
+            font-weight: 600;
+        }
+        .day-cell.sakit {
+            background-color: #fee2e2; /* red-200 */
+            color: #991b1b; /* red-800 */
+            font-weight: 600;
+        }
+
+        /* === Sidebar Off-Canvas Styles === */
+        aside {
+            position: fixed;
+            top: 0;
+            left: -256px; /* Initially off-screen to the left (w-64 is 256px) */
+            width: 256px; /* Fixed width when visible */
+            height: 100vh; /* Full viewport height */
+            background-color: #1e293b; /* slate-800 */
+            color: white;
+            padding: 1rem;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            transition: left 0.3s ease-in-out; /* Smooth slide-in/out */
+            z-index: 45; /* Below the hamburger, above main content */
+        }
+
+        aside.expanded {
+            left: 0; /* Slide in to be visible */
+        }
+        
+        main {
+            /* No margin-left needed here, as sidebar is fixed and off-canvas */
+            flex-grow: 1; /* Allow main content to take all available space */
+            transition: transform 0.3s ease-in-out; /* Smooth transform for main content */
+        }
+
+        /* When sidebar is expanded, push main content to the right (optional, for visual effect) */
+        body.sidebar-expanded main {
+            transform: translateX(256px); /* Push main content by sidebar width */
+        }
+
+        /* Hamburger Icon (fixed) */
+        .hamburger-menu {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 50; /* Ensure it's on top */
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+            border-radius: 9999px; /* rounded-full */
+            width: 48px; /* w-12 */
+            height: 48px; /* h-12 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.2s ease; /* Smooth fade for hamburger */
+        }
+        .hamburger-menu:hover {
+            background-color: #0284c7; /* sky-600 */
+        }
+        .hamburger-menu i {
+            font-size: 1.5rem; /* text-xl */
+        }
+
+        /* Close Button inside Sidebar */
+        #sidebar-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 55; /* Ensure it's above other sidebar content */
+        }
+        #sidebar-close-btn:hover {
+            color: #cbd5e1; /* slate-300 */
+        }
+        
+        /* Sidebar content text always visible when sidebar is open */
+        .sidebar-text-content {
+            opacity: 1; /* Always visible when sidebar is open, as we control visibility of sidebar itself */
+            visibility: visible;
+            white-space: nowrap;
+        }
+
+        /* Hide sidebar text content when sidebar is fully collapsed by controlling sidebar's overflow */
+        /* (This is implicitly handled by `overflow-x: hidden` on `aside` and `width: 0`) */
+
+
+        /* NEW PRESENSI PAGE STYLES */
+        .presensi-status-badge {
+            @apply px-3 py-1 rounded-full text-xs font-semibold;
+        }
+        .presensi-form-container {
+            @apply p-6 bg-white rounded-xl shadow-md border border-slate-200;
+        }
+        .presensi-section-title {
+            @apply text-xl font-bold text-slate-800 mb-4 pb-3 border-b border-slate-200 flex items-center;
+        }
+        .presensi-section-title i {
+            @apply mr-3 text-sky-600;
+        }
+
+        /* Overlay for when sidebar is open (to click outside and close) */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40; /* Between sidebar and main content */
+            display: none;
+        }
+        body.sidebar-expanded .overlay {
+            display: block;
+        }
+
+    </style>
+</head>
+<body class="flex h-screen">
+
+    <button id="hamburger-btn" class="hamburger-menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="overlay" class="overlay"></div>
+
+    <div class="fixed top-4 right-6 z-40">
+        <button onclick="showPage('profil')" class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+            <i class="fas fa-user text-slate-600 text-lg"></i>
+        </button>
+    </div>
+
+    <aside class="bg-slate-800 text-white flex flex-col p-4 space-y-2">
+        <button id="sidebar-close-btn" class="absolute top-4 right-4 text-white text-xl hidden">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="flex items-center py-4 px-2 space-x-3">
+            <img src="logoTI.png" alt="Logo UNS" class="h-12 w-12 flex-shrink-0">
+            <div class="text-left">
+                <h1 class="text-xl font-bold leading-tight sidebar-text-content">LSTARS</h1>
+                <p class="text-xs text-slate-400 leading-tight sidebar-text-content">Fakultas Teknik</p>
+            </div>
+        </div>
+        <hr class="border-slate-600">
+        <nav class="flex-grow pt-4">
+            <a href="#" onclick="showPage('home')" class="sidebar-link active flex items-center p-3 rounded-lg"><i class="fas fa-home w-6 mr-2"></i><span class="sidebar-text-content ml-2">Beranda</span></a>
+            
+            <h3 class="text-slate-400 font-semibold mt-4 mb-2 px-3 text-sm sidebar-text-content">Informasi</h3>
+            <a href="#" onclick="showPage('dosen')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-user-tie w-6 mr-2"></i><span class="sidebar-text-content ml-2">Database Dosen</span></a>
+            <a href="#" onclick="showPage('asisten')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-user-graduate w-6 mr-2"></i><span class="sidebar-text-content ml-2">Database Asisten</span></a>
+            <a href="#" onclick="showPage('fasilitas')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-cogs w-6 mr-2"></i><span class="sidebar-text-content ml-2">Fasilitas & SOP</span></a>
+            <a href="#" onclick="showPage('dokumentasi')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-camera-retro w-6 mr-2"></i><span class="sidebar-text-content ml-2">Dokumentasi</span></a>
+            <a href="#" onclick="showPage('alumni')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-users w-6 mr-2"></i><span class="sidebar-text-content ml-2">Alumni Stories</span></a>
+            
+            <h3 class="text-slate-400 font-semibold mt-4 mb-2 px-3 text-sm sidebar-text-content">Layanan Laboratorium</h3>
+            <a href="#" onclick="showPage('inventory')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-boxes w-6 mr-2"></i><span class="sidebar-text-content ml-2">Inventaris Alat</span></a>
+            <a href="#" onclick="showPage('izin')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-file-alt w-6 mr-2"></i><span class="sidebar-text-content ml-2">Izin Kerja/Riset</span></a>
+            <a href="#" onclick="showPage('presensi')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-clock w-6 mr-2"></i><span class="sidebar-text-content ml-2">Presensi Piket</span></a>
+            <a href="#" onclick="showPage('logbook')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-book w-6 mr-2"></i><span class="sidebar-text-content ml-2">Logbook Kegiatan</span></a>
+
+            <div id="admin-menu-links" class="space-y-2 hidden">
+                <h3 class="text-slate-400 font-semibold mt-4 mb-2 px-3 text-sm sidebar-text-content">Admin Lab</h3>
+                <a href="#" onclick="showPage('peminjaman')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-hand-holding-hand w-6 mr-2"></i><span class="sidebar-text-content ml-2">Peminjaman</span></a>
+                <a href="#" onclick="showPage('pengembalian')" class="sidebar-link flex items-center p-3 rounded-lg"><i class="fas fa-undo w-6 mr-2"></i><span class="sidebar-text-content ml-2">Pengembalian</span></a>
+            </div>
+        </nav>
+        <div class="text-xs text-slate-500 p-2 text-center">
+            <p class="sidebar-text-content">User ID:</p>
+            <p id="userIdDisplay" class="break-words sidebar-text-content">Offline</p>
+        </div>
+        
+        <div class="mt-auto p-2">
+             <button id="admin-login-btn" class="btn btn-primary w-full">
+                 <i class="fas fa-user-shield mr-2"></i><span class="sidebar-text-content"> Login Admin</span>
+             </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div id="home" class="main-content active">
+            <div class="relative hero-bg rounded-xl shadow-lg p-8 md:p-12 mb-8 overflow-hidden">
+                <div class="absolute inset-0 bg-slate-900/60"></div>
+                <div class="relative z-10 text-white">
+                    <h1 class="text-4xl md:text-5xl font-extrabold mb-3">Selamat Datang di LSTARS</h1>
+                    <p class="text-lg text-slate-300 max-w-2xl">
+                        Pusat layanan terpadu Laboratorium Pengembangan Sumber Daya dan Keterampilan Elektronika.
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-slate-800 mb-4">Akses Cepat</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <a href="#" onclick="showPage('inventory')" class="group bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 p-6 flex flex-col items-center text-center border border-slate-200">
+                    <div class="flex items-center justify-center bg-sky-100 text-sky-600 rounded-full w-16 h-16 mb-4 shadow-md group-hover:bg-sky-200 transition-colors">
+                        <i class="fas fa-boxes fa-2x"></i>
+                    </div>
+                    <h4 class="font-bold text-xl text-slate-800 mb-2">Inventaris Alat</h4>
+                    <p class="text-slate-600 text-sm mb-4 flex-grow">Lihat daftar alat dan ketersediaan di lab.</p>
+                    <span class="font-semibold text-sky-700 group-hover:underline flex items-center">Cek Inventaris <i class="fas fa-chevron-right fa-xs ml-1 group-hover:translate-x-1 transition-transform"></i></span>
+                </a>
+                <a href="#" onclick="showPage('presensi')" class="group bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 p-6 flex flex-col items-center text-center border border-slate-200">
+                    <div class="flex items-center justify-center bg-emerald-100 text-emerald-600 rounded-full w-16 h-16 mb-4 shadow-md group-hover:bg-emerald-200 transition-colors">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h4 class="font-bold text-xl text-slate-800 mb-2">Presensi Piket</h4>
+                    <p class="text-slate-600 text-sm mb-4 flex-grow">Lakukan check-in dan check-out jadwal piket Anda.</p>
+                    <span class="font-semibold text-emerald-700 group-hover:underline flex items-center">Lakukan Presensi <i class="fas fa-chevron-right fa-xs ml-1 group-hover:translate-x-1 transition-transform"></i></span>
+                </a>
+                <a href="#" onclick="showPage('logbook')" class="group bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 p-6 flex flex-col items-center text-center border border-slate-200">
+                    <div class="flex items-center justify-center bg-amber-100 text-amber-600 rounded-full w-16 h-16 mb-4 shadow-md group-hover:bg-amber-200 transition-colors">
+                        <i class="fas fa-book-open fa-2x"></i>
+                    </div>
+                    <h4 class="font-bold text-xl text-slate-800 mb-2">Logbook Digital</h4>
+                    <p class="text-slate-600 text-sm mb-4 flex-grow">Catat semua kegiatan riset atau praktikum Anda di sini.</p>
+                    <span class="font-semibold text-amber-700 group-hover:underline flex items-center">Buka Logbook <i class="fas fa-chevron-right fa-xs ml-1 group-hover:translate-x-1 transition-transform"></i></span>
+                </a>
+            </div>
+
+            <h3 class="text-2xl font-bold text-slate-800 mb-4">Info Terkini</h3>
+            <div class="card p-0 overflow-hidden">
+                <div class="grid md:grid-cols-2 gap-0 items-center">
+                    <div class="p-8">
+                        <span class="text-xs font-bold uppercase text-sky-600 bg-sky-100 px-2 py-1 rounded-full">PENGUMUMAN</span>
+                        <h4 class="font-extrabold text-2xl text-slate-800 my-3">SOP Baru Penggunaan Osiloskop Digital</h4>
+                        <p class="text-slate-600 mb-6">
+                            Telah terbit standar operasional prosedur (SOP) baru untuk penggunaan Osiloskop Digital Tektronix. Seluruh pengguna wajib membaca dan memahaminya sebelum melakukan riset.
+                        </p>
+                        <button onclick="showPage('fasilitas')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center">
+                            Lihat SOP <i class="fas fa-file-alt ml-2"></i>
+                        </button>
+                    </div>
+                    <div class="h-full hidden md:block">
+                        <img src="https://images.unsplash.com/photo-1616432935027-66a435de3a07?q=80&w=1974&auto=format&fit=crop" alt="Peralatan Lab" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="profil" class="main-content">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="flex-shrink-0 w-16 h-16 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-user-circle fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-800">Profil Saya</h2>
+                    <p class="text-slate-500 mt-1">Kelola informasi pribadi dan pantau aktivitas Anda di laboratorium.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="card p-8 flex flex-col items-center text-center bg-white rounded-xl shadow-lg border border-slate-200">
+                        <div class="w-28 h-28 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center mb-5 border-4 border-white shadow-md">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-1">Pengguna LSTARS</h3>
+                        <p class="text-base text-slate-600 mt-2">User ID:</p>
+                        <p id="profile-user-id" class="font-mono text-sm bg-slate-100 px-3 py-1 rounded-full break-all shadow-inner">Memuat...</p>
+                        <button class="btn mt-6 bg-sky-600 hover:bg-sky-700 text-white px-5 py-2 rounded-lg shadow-md transition-all duration-200">
+                            <i class="fas fa-edit mr-2"></i>Edit Profil
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="card bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4 pb-3 border-b-2 border-sky-200 flex items-center">
+                            <i class="fas fa-hand-holding-hand mr-3 text-sky-600"></i>Alat yang Sedang Dipinjam
+                        </h3>
+                        <div id="profile-peminjaman-summary" class="space-y-3">
+                            <p class="text-slate-500 py-4 text-center">Memuat data peminjaman...</p>
+                            </div>
+                    </div>
+
+                    <div class="card bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4 pb-3 border-b-2 border-sky-200 flex items-center">
+                            <i class="fas fa-book-open mr-3 text-sky-600"></i>Logbook Terbaru
+                        </h3>
+                        <div id="profile-logbook-summary" class="space-y-3">
+                            <p class="text-slate-500 py-4 text-center">Memuat riwayat logbook...</p>
+                            </div>
+                        <div class="text-right mt-6">
+                            <a href="#" onclick="showPage('logbook')" class="text-sky-600 font-semibold hover:underline flex items-center justify-end">
+                                Lihat Semua Logbook <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dosen" class="main-content">
+            <div class="flex items-center gap-4 mb-8 p-4 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-xl shadow-lg">
+                <div class="flex-shrink-0 w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user-tie fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold">Database Dosen LSTARS</h2>
+                    <p class="text-blue-100 mt-1 text-lg">Daftar dosen pengajar yang terhubung dengan laboratorium.</p>
+                </div>
+            </div>
+            <div class="card mb-6 p-6 border border-slate-200">
+                <h3 class="text-xl font-bold text-slate-700 mb-4 flex items-center"><i class="fas fa-filter mr-2 text-slate-500"></i>Filter Data Dosen</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="filter-nidn" class="block text-sm font-medium text-slate-700 mb-1">NIDN</label>
+                        <input type="text" id="filter-nidn" class="w-full px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400 text-slate-700 placeholder-slate-400 transition-all duration-200" placeholder="Cari NIDN...">
+                    </div>
+                    <div>
+                        <label for="filter-nama" class="block text-sm font-medium text-slate-700 mb-1">Nama Dosen</label>
+                        <input type="text" id="filter-nama" class="w-full px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-400 focus:border-blue-400 text-slate-700 placeholder-slate-400 transition-all duration-200" placeholder="Cari Nama...">
+                    </div>
+                    <div class="flex items-end">
+                        <button id="reset-filter-btn" class="w-full px-4 py-2 rounded-lg font-semibold text-white bg-red-500 hover:bg-red-600 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center">
+                            <i class="fas fa-undo-alt mr-2"></i>Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-8 p-0 overflow-hidden border border-slate-200">
+                <div class="flex text-sm font-bold text-slate-600 px-4 py-3 bg-sky-50 border-b border-sky-100 uppercase">
+                    <div class="w-2/12">NIDN</div>
+                    <div class="w-4/12">NAMA DOSEN</div>
+                    <div class="w-2/12">NIP</div>
+                    <div class="w-2/12 text-center">HOMEBASE</div>
+                    <div class="w-2/12 text-center">AKSI</div>
+                </div>
+                <div id="dosen-list-container" class="space-y-1 p-2">
+                    <p class="text-center text-slate-500 py-4">Memuat data dosen...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="dosen-detail" class="main-content">
+            <div class="flex items-center mb-6">
+                <button id="back-to-dosen-list" class="btn bg-slate-600 hover:bg-slate-700 focus:ring-slate-500 mr-4">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali
+                </button>
+                <h2 class="text-3xl font-bold text-slate-800">Profil Dosen</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="card p-8 flex flex-col items-center text-center sticky top-8 bg-gradient-to-br from-blue-500 to-sky-600 text-white shadow-xl border border-blue-400">
+                        <img id="detail-foto" src="https://placehold.co/150x150/e2e8f0/64748b?text=Dosen" alt="Foto Dosen" class="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-white mb-4">
+                        <h3 id="detail-nama-lengkap-card" class="text-2xl font-bold">Nama Lengkap Dosen</h3>
+                        <p id="detail-jabatan-card" class="font-semibold text-blue-100 mb-2">Dosen Teknik Industri</p>
+                        <p id="detail-nidn-card" class="text-sm text-blue-200 font-mono"></p>
+                        <hr class="my-6 w-full border-blue-400">
+                        <div class="w-full text-left space-y-3 text-sm">
+                            <div class="flex items-center text-blue-100">
+                                <i class="fas fa-envelope w-6 text-blue-200"></i>
+                                <span id="detail-email-card" class="ml-2 truncate"></span>
+                            </div>
+                            <div class="flex items-center text-blue-100">
+                                <i class="fas fa-graduation-cap w-6 text-blue-200"></i>
+                                <span id="detail-sinta-card" class="ml-2">SINTA ID: 123456</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="card border border-slate-200">
+                        <h4 class="text-xl font-bold text-slate-800 border-b pb-3 mb-4 flex items-center"><i class="fas fa-info-circle mr-2 text-sky-600"></i>Tentang Saya</h4>
+                        <p id="detail-tentang" class="text-slate-700 leading-relaxed">
+                            Informasi mengenai deskripsi singkat, fokus riset, atau biografi dari dosen yang bersangkutan. Data ini dapat ditambahkan di database untuk tampilan yang lebih lengkap.
+                        </p>
+                    </div>
+
+                    <div class="card border border-slate-200">
+                        <div class="border-b border-slate-200">
+                            <nav id="detail-tabs-container" class="-mb-px flex space-x-6">
+                            </nav>
+                        </div>
+                        
+                        <div id="detail-tab-content-container" class="pt-6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="asisten" class="main-content">
+    <div class="flex items-center gap-5 mb-8 p-6 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl">
+        <div class="flex-shrink-0 w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center border-2 border-white border-opacity-50">
+            <i class="fas fa-user-graduate fa-3x text-white drop-shadow-md"></i>
+        </div>
+        <div>
+            <h2 class="text-4xl font-extrabold leading-tight">Database Asisten Laboratorium</h2>
+            <p class="text-emerald-100 mt-2 text-lg">Kelola dan jelajahi daftar mahasiswa aktif sebagai asisten laboratorium.</p>
+        </div>
+        <button id="btn-tambah-asisten" class="btn bg-white text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 px-6 py-3 rounded-full shadow-lg transform hover:-translate-y-1 transition-all duration-300 hidden ml-auto">
+            <i class="fas fa-plus mr-2 text-xl"></i> Tambah Asisten
+        </button>
+    </div>
+
+    <div class="card mb-8 p-6 border border-slate-200 bg-white rounded-xl shadow-lg">
+        <h3 class="text-2xl font-bold text-slate-800 mb-5 flex items-center">
+            <i class="fas fa-search-plus mr-3 text-emerald-600"></i>Cari & Filter Asisten
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+                <label for="filter-nim-asisten" class="block text-sm font-semibold text-slate-700 mb-2">NIM</label>
+                <input type="text" id="filter-nim-asisten" class="w-full px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-emerald-400 focus:border-emerald-400 text-slate-700 placeholder-slate-400 transition-all duration-200 bg-white hover:border-emerald-300" placeholder="Cari NIM...">
+            </div>
+            <div>
+                <label for="filter-nama-asisten" class="block text-sm font-semibold text-slate-700 mb-2">Nama Asisten</label>
+                <input type="text" id="filter-nama-asisten" class="w-full px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-emerald-400 focus:border-emerald-400 text-slate-700 placeholder-slate-400 transition-all duration-200 bg-white hover:border-emerald-300" placeholder="Cari Nama...">
+            </div>
+            <div class="flex items-end">
+                <button id="reset-filter-asisten-btn" class="w-full px-5 py-2.5 rounded-lg font-semibold text-white bg-gray-500 hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center">
+                    <i class="fas fa-eraser mr-2"></i>Reset Filter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-8 p-0 overflow-hidden border border-slate-200 bg-white rounded-xl shadow-lg">
+        <div class="flex text-sm font-bold text-slate-700 px-6 py-4 bg-emerald-50 border-b border-emerald-100 uppercase sticky top-0 z-10">
+            <div class="w-[5%] text-center">NO</div>
+            <div class="w-[15%]">NIM</div>
+            <div class="w-[40%]">NAMA</div>
+            <div class="w-[15%] text-center">ANGKATAN</div>
+            <div class="w-[10%] text-center">STATUS</div>
+            <div class="w-[15%] text-center">AKSI</div>
+        </div>
+        <div id="asisten-list-container" class="divide-y divide-slate-100 overflow-y-auto max-h-[60vh]">
+            <p class="text-center text-slate-500 py-8">Memuat data asisten...</p>
+            </div>
+    </div>
+</div>
+
+<div id="asisten-crud-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 id="asisten-modal-title" class="text-xl font-bold mb-4"></h3>
+        <div id="asisten-modal-body" class="text-slate-600 mb-6"></div>
+        <div class="flex justify-end space-x-2">
+            <button id="asisten-modal-close-btn" class="btn btn-secondary">Tutup</button>
+            <button id="asisten-modal-confirm-btn" class="btn btn-success hidden">Simpan</button>
+        </div>
+    </div>
+</div>
+
+        <div id="fasilitas" class="main-content">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-800">Fasilitas & SOP Laboratorium</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Jelajahi fasilitas modern dan unduh standar operasional prosedur kami untuk mendukung kegiatan riset dan praktikum Anda.</p>
+            </div>
+            
+            <div class="mb-16">
+                <h3 class="text-3xl font-bold text-slate-800 mb-6 border-l-4 border-sky-500 pl-4">Fasilitas Utama</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1581092921440-4c31135d4452?q=80&w=2070&auto=format&fit=crop" alt="Ruang Praktikum" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <div class="flex items-center text-white">
+                                    <i class="fas fa-desktop fa-2x mr-3"></i>
+                                    <h4 class="text-2xl font-bold">Ruang Praktikum</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-slate-600 mb-4">Ruang yang dirancang untuk kegiatan praktikum dengan kapasitas hingga 30 mahasiswa, dilengkapi meja kerja dan sumber daya listrik yang memadai.</p>
+                            <ul class="space-y-2 text-sm text-slate-700">
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> 20+ Set Komputer Spek Tinggi</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Proyektor & Layar Interaktif</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Papan Tulis Kaca</li>
+                            </ul>
+                        </div>
+                    </div>
+        
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?q=80&w=2070&auto=format&fit=crop" alt="Ruang Riset" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <div class="flex items-center text-white">
+                                    <i class="fas fa-flask fa-2x mr-3"></i>
+                                    <h4 class="text-2xl font-bold">Ruang Riset</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-slate-600 mb-4">Area khusus yang didedikasikan untuk penelitian mahasiswa tingkat akhir dan dosen, dilengkapi peralatan ukur presisi tinggi.</p>
+                             <ul class="space-y-2 text-sm text-slate-700">
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Osiloskop Digital & Analog</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Catu Daya DC Variabel</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Berbagai Macam Sensor</li>
+                            </ul>
+                        </div>
+                    </div>
+        
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=2070&auto=format&fit=crop" alt="Perpustakaan Mini" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <div class="flex items-center text-white">
+                                    <i class="fas fa-book-bookmark fa-2x mr-3"></i>
+                                    <h4 class="text-2xl font-bold">Perpustakaan Mini</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-slate-600 mb-4">Koleksi referensi penting yang dapat diakses oleh seluruh pengguna laboratorium untuk mendukung studi dan penelitian mereka.</p>
+                             <ul class="space-y-2 text-sm text-slate-700">
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Buku Teks & Jurnal Ilmiah</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Laporan Tugas Akhir Terdahulu</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-sky-500 mr-2"></i> Akses Jurnal Elektronik</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-3xl font-bold text-slate-800 mb-6 border-l-4 border-sky-500 pl-4">Standar Operasional Prosedur (SOP)</h3>
+                <div class="bg-white rounded-xl shadow-lg p-6 space-y-4">
+                    
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 transition-colors duration-200">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-pdf text-red-500 fa-2x mr-4"></i>
+                            <div>
+                                <h5 class="font-bold text-slate-800">SOP Penggunaan Osiloskop</h5>
+                                <p class="text-sm text-slate-500">Panduan lengkap kalibrasi dan penggunaan alat ukur osiloskop.</p>
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-primary">Unduh</a>
+                    </div>
+        
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 transition-colors duration-200">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-alt text-blue-500 fa-2x mr-4"></i>
+                            <div>
+                                <h5 class="font-bold text-slate-800">SOP Peminjaman Alat</h5>
+                                <p class="text-sm text-slate-500">Prosedur resmi untuk meminjam dan mengembalikan peralatan lab.</p>
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-primary">Unduh</a>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50 transition-colors duration-200">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-shield text-green-500 fa-2x mr-4"></i>
+                            <div>
+                                <h5 class="font-bold text-slate-800">SOP Keselamatan Kerja (K3)</h5>
+                                <p class="text-sm text-slate-500">Aturan dan panduan keselamatan kerja di dalam lingkungan lab.</p>
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-primary">Unduh</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dokumentasi" class="main-content">
+            <h2 class="text-3xl font-bold text-slate-800">Dokumentasi Kegiatan</h2>
+            <p class="text-slate-600 mt-1 mb-6">Koleksi foto dan dokumentasi berbagai kegiatan di Laboratorium Pengembangan Sistem dan Komputasi Edukatif</p>
+            
+            <h3 class="font-semibold text-slate-800 mb-3">Filter Kategori:</h3>
+            <div id="dokumentasi-kategori-filter-container" class="flex flex-wrap items-center gap-3 mb-6">
+                <p class="text-slate-500">Memuat kategori...</p>
+            </div>
+            
+            <div id="dokumentasi-info" class="text-slate-600 mb-6"></div>
+
+            <div id="dokumentasi-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div id="dokumentasi-loader" class="col-span-full flex flex-col items-center justify-center py-16">
+                   <div class="loader"></div>
+                   <p class="text-slate-500 mt-4">Memuat dokumentasi...</p>
+                </div>
+            </div>
+        </div>
+        <div id="alumni" class="main-content">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6">Alumni Stories</h2>
+            <p class="text-slate-600 mb-8">Kisah dan testimoni inspiratif dari para alumni yang telah berkarya setelah lulus.</p>
+            <div id="alumni-list" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <p>Memuat cerita alumni...</p>
+            </div>
+        </div>
+
+        <div id="inventory" class="main-content">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="flex-shrink-0 w-16 h-16 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-tools fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-800">Inventaris Alat & Ruang</h2>
+                    <p class="text-slate-500 mt-1">Kelola dan pantau ketersediaan semua alat dan fasilitas di laboratorium.</p>
+                </div>
+            </div>
+
+            <div class="card mb-8 p-6 border border-slate-200 bg-white rounded-xl shadow-lg">
+                <h3 class="text-xl font-bold text-slate-800 mb-5 flex items-center">
+                    <i class="fas fa-filter mr-3 text-orange-600"></i>Filter & Cari Inventaris
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label for="filter-id-barang" class="block text-sm font-semibold text-slate-700 mb-2">ID Barang</label>
+                        <input type="text" id="filter-id-barang" class="w-full px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-400 focus:border-orange-400 text-slate-700 placeholder-slate-400 transition-all duration-200 bg-white hover:border-orange-300" placeholder="Cari ID barang...">
+                    </div>
+                    <div>
+                        <label for="filter-nama-aset" class="block text-sm font-semibold text-slate-700 mb-2">Nama Aset</label>
+                        <input type="text" id="filter-nama-aset" class="w-full px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-400 focus:border-orange-400 text-slate-700 placeholder-slate-400 transition-all duration-200 bg-white hover:border-orange-300" placeholder="Cari nama aset...">
+                    </div>
+                    <div class="flex items-end">
+                        <button id="reset-filter-inventory-btn" class="w-full px-5 py-2.5 rounded-lg font-semibold text-white bg-gray-500 hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center">
+                            <i class="fas fa-eraser mr-2"></i>Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-amber-50 border-b-2 border-amber-100">
+                            <tr class="text-sm font-bold text-amber-800 uppercase">
+                                <th class="p-4">ID Barang</th>
+                                <th class="p-4">Nama Aset</th>
+                                <th class="p-4 text-center">Kondisi</th>
+                                <th class="p-4 text-center">Tersedia</th>
+                                <th class="p-4 text-center">Total</th>
+                                <th class="p-4">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-slate-500">
+                                    <div class="flex flex-col items-center justify-center py-4">
+                                        <i class="fas fa-spinner fa-spin fa-2x text-gray-400 mb-2"></i>
+                                        <p>Memuat data inventaris...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mt-8 border border-slate-200 p-6 rounded-xl shadow-md">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-3 text-slate-600"></i>Status Inventaris
+                </h3>
+                <p class="text-slate-700 text-base">Pastikan untuk selalu memperbarui status ketersediaan alat setelah peminjaman atau pengembalian.</p>
+                <p class="mt-3 font-semibold text-slate-800">Total Aset Tercatat: <span id="total-assets-display" class="text-blue-600">Memuat...</span></p>
+            </div>
+        </div>
+
+        
+        <div id="peminjaman" class="main-content">
+            <div class="flex items-center gap-4 mb-8">
+    <div class="flex-shrink-0 w-16 h-16 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+        <i class="fas fa-hand-holding-box fa-2x"></i>
+    </div>
+    <div>
+        <h2 class="text-3xl font-bold text-slate-800">Peminjaman Alat & Ruang</h2>
+        <p class="text-slate-500 mt-1">Ajukan permohonan peminjaman alat dan fasilitas laboratorium dengan mudah.</p>
+    </div>
+</div>
+
+            <div class="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-3">
+                    <div class="card h-full bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 border-b-2 border-sky-200 pb-4 flex items-center">
+                            <i class="fas fa-clipboard-list mr-3 text-sky-600"></i>Formulir Pengajuan
+                        </h3>
+                        <form id="form-peminjaman" class="space-y-6">
+                            <div>
+                                <label for="pinjam-alat" class="block font-semibold text-slate-700 mb-2"><i class="fas fa-tools w-6 mr-2 text-slate-500"></i>Pilih Alat/Ruang</label>
+                                <div class="relative">
+                                    <select id="pinjam-alat" class="form-input appearance-none rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500 pr-10" required>
+                                        <option value="">Memuat alat yang tersedia...</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">Hanya alat dengan status "Tersedia" yang akan muncul di sini.</p>
+                            </div>
+                            <div>
+                                <label for="pinjam-nama" class="block font-semibold text-slate-700 mb-2"><i class="fas fa-user w-6 mr-2 text-slate-500"></i>Nama Lengkap Peminjam</label>
+                                <input type="text" id="pinjam-nama" class="form-input rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required placeholder="Contoh: Budi Santoso">
+                            </div>
+                            <div>
+                                <label for="pinjam-nim" class="block font-semibold text-slate-700 mb-2"><i class="fas fa-id-card w-6 mr-2 text-slate-500"></i>NIM Peminjam</label>
+                                <input type="text" id="pinjam-nim" class="form-input rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required placeholder="Contoh: M0521001">
+                            </div>
+                            <div>
+                                <label for="pinjam-keperluan" class="block font-semibold text-slate-700 mb-2"><i class="fas fa-tasks w-6 mr-2 text-slate-500"></i>Keperluan Peminjaman</label>
+                                <textarea id="pinjam-keperluan" class="form-input rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" rows="4" required placeholder="Contoh: Pengerjaan tugas akhir mengenai analisis sinyal digital."></textarea>
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full flex items-center justify-center text-base py-3 font-bold text-white rounded-lg bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-600 hover:to-sky-700 shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                                    <i class="fas fa-paper-plane mr-3"></i>
+                                    Ajukan Peminjaman Sekarang
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="card space-y-6 bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+                        <h3 class="text-2xl font-bold text-slate-800 border-b-2 border-emerald-200 pb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-3 text-emerald-600"></i>Prosedur Peminjaman
+                        </h3>
+                        <ul class="list-none text-slate-700 space-y-4">
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mr-3 shadow-sm">1</div>
+                                <div>
+                                    <p class="font-semibold">Isi Formulir Lengkap</p>
+                                    <p class="text-sm text-slate-600">Pastikan semua kolom pengajuan terisi dengan data yang valid dan benar.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mr-3 shadow-sm">2</div>
+                                <div>
+                                    <p class="font-semibold">Ajukan Permohonan</p>
+                                    <p class="text-sm text-slate-600">Klik tombol "Ajukan Peminjaman Sekarang" untuk mengirim permohonan Anda.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mr-3 shadow-sm">3</div>
+                                <div>
+                                    <p class="font-semibold">Tunggu Konfirmasi</p>
+                                    <p class="text-sm text-slate-600">Permohonan Anda akan ditinjau oleh Asisten Laboratorium. Pantau status di profil Anda.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mr-3 shadow-sm">4</div>
+                                <div>
+                                    <p class="font-semibold">Pengambilan & Pengembalian</p>
+                                    <p class="text-sm text-slate-600">Ambil dan kembalikan alat di lab sesuai jadwal yang disepakati. Jaga kondisi alat.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card mt-8 bg-blue-50 border-2 border-blue-200 p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                            <i class="fas fa-headset mr-3 text-blue-600"></i>Butuh Bantuan?
+                        </h3>
+                        <p class="text-blue-700 text-base">Jika mengalami kesulitan atau memiliki pertanyaan, jangan ragu untuk menghubungi Asisten Laboratorium yang sedang piket.</p>
+                        <p class="mt-3 font-semibold text-blue-900">Kontak: <span class="text-blue-600 hover:underline">0812-3456-7890 (WhatsApp)</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="pengembalian" class="main-content">
+            <div class="flex items-center gap-5 mb-8 p-6 bg-gradient-to-r from-teal-500 to-green-600 text-white rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-[1.005] hover:shadow-2xl">
+                <div class="flex-shrink-0 w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center border-2 border-white border-opacity-50">
+                    <i class="fas fa-undo-alt fa-3x text-white drop-shadow-md"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold leading-tight">Pengembalian Alat & Ruang</h2>
+                    <p class="text-green-100 mt-2 text-lg">Catat pengembalian alat dan fasilitas yang telah dipinjam di laboratorium.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fas fa-list-alt mr-3 text-green-600"></i>Daftar Peminjaman Aktif
+                    </h3>
+                    <p class="text-slate-600 mb-6">Berikut adalah daftar alat yang sedang dipinjam. Klik tombol **"Kembalikan"** untuk menyelesaikan proses pengembalian.</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-green-50 border-b-2 border-green-100">
+                            <tr class="text-sm font-bold text-slate-700 uppercase">
+                                <th class="p-4 text-center w-[5%]">No.</th>
+                                <th class="p-4 w-[20%]">Nama Alat/Ruang</th>
+                                <th class="p-4 w-[20%]">Peminjam</th>
+                                <th class="p-4 w-[25%]">Keperluan</th>
+                                <th class="p-4 w-[15%]">Tanggal Pinjam</th>
+                                <th class="p-4 text-center w-[15%]">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pengembalian-list" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-slate-500">
+                                    <div class="flex flex-col items-center justify-center py-4">
+                                        <i class="fas fa-spinner fa-spin fa-2x text-gray-400 mb-2"></i>
+                                        <p>Memuat data pengembalian...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mt-8 bg-green-50 border-2 border-green-200 p-6 rounded-xl shadow-md">
+                <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-3 text-green-600"></i>Penting!
+                </h3>
+                <ul class="list-disc list-inside text-green-700 text-base space-y-2">
+                    <li>Pastikan **kondisi alat** sudah diverifikasi sebelum mengklik "Kembalikan".</li>
+                    <li>Proses ini akan memperbarui status ketersediaan alat di inventaris.</li>
+                    <li>Hubungi admin jika ada kendala saat pengembalian.</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div id="izin" class="main-content">
+            <div class="flex items-center gap-5 mb-8">
+                <div class="flex-shrink-0 w-16 h-16 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-file-signature fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-800">Izin Kerja & Penelitian</h2>
+                    <p class="text-slate-500 mt-1">Ajukan permohonan resmi untuk kegiatan Anda di laboratorium.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-6 gap-8 items-start">
+                
+                <div class="lg:col-span-4">
+                    <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-200">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 pb-4 border-b border-slate-200">
+                            Formulir Pengajuan Izin
+                        </h3>
+                        <form id="form-izin" class="space-y-6">
+                            <div>
+                                <label for="izin-judul" class="block text-sm font-semibold text-slate-700 mb-2">Judul Penelitian/Kegiatan</label>
+                                <div class="relative">
+                                    <i class="fas fa-lightbulb absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="izin-judul" class="form-input pl-12 py-3" required placeholder="Contoh: Analisis Rangkaian Filter Aktif">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="izin-pembimbing" class="block text-sm font-semibold text-slate-700 mb-2">Dosen Pembimbing</label>
+                                <div class="relative">
+                                    <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <select id="izin-pembimbing" class="form-input pl-12 py-3" required>
+                                        <option value="">-- Pilih Dosen Pembimbing --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="izin-deskripsi" class="block text-sm font-semibold text-slate-700 mb-2">Deskripsi Singkat</label>
+                                <textarea id="izin-deskripsi" class="form-input pl-4" rows="5" required placeholder="Jelaskan secara singkat tujuan, metodologi, dan alat utama yang akan digunakan dalam kegiatan Anda."></textarea>
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full flex items-center justify-center text-base py-3 font-bold text-white rounded-lg bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 shadow-lg shadow-sky-500/30 transform hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-4 focus:ring-sky-300">
+                                    <i class="fas fa-paper-plane mr-3"></i>
+                                    Kirim Pengajuan Sekarang
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <div class="bg-sky-50 border-l-4 border-sky-400 p-6 rounded-lg h-full">
+                        <h3 class="text-xl font-bold text-sky-800 mb-4 flex items-center">
+                            <i class="fas fa-stream mr-2"></i>Alur Pengajuan
+                        </h3>
+                        <ol class="list-decimal list-inside space-y-3 text-sky-700">
+                            <li>Isi formulir dengan lengkap.</li>
+                            <li>Kirim pengajuan untuk ditinjau.</li>
+                            <li>Pantau status pada tabel riwayat.</li>
+                            <li>Mulai kegiatan jika sudah disetujui.</li>
+                        </ol>
+                        <div class="mt-6 bg-white p-4 rounded-lg border">
+                            <h4 class="font-bold text-slate-700">Butuh Bantuan?</h4>
+                            <p class="text-sm text-slate-600 mt-1">Hubungi Admin Lab jika ada pertanyaan: <span class="font-semibold text-sky-600">admin.lab@email.com</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-slate-800 mt-12 mb-4">Riwayat Pengajuan Izin Anda</h3>
+            <div class="card p-0 overflow-hidden">
+                <div class="flex text-sm font-bold text-slate-500 px-4 py-3 bg-slate-50 border-b">
+                    <div class="w-4/12">JUDUL KEGIATAN</div>
+                    <div class="w-3/12">NAMA PEMBIMBING</div>
+                    <div class="w-2/12">TANGGAL PENGAJUAN</div>
+                    <div class="w-1/12 text-center">STATUS</div>
+                    <div class="w-2/12 text-center">AKSI</div>
+                </div>
+                <div id="izin-history" class="space-y-2 p-2">
+                    <p class="text-center text-slate-500 py-4">Memuat riwayat izin...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="presensi" class="main-content">
+            <div class="container mx-auto max-w-7xl px-4 py-8">
+                <div class="flex items-center gap-5 mb-8">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-calendar-check fa-2x"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-800">Presensi Piket Asisten</h2>
+                        <p class="text-slate-500 mt-1">Catat kehadiran piket Anda di laboratorium.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                    <div class="lg:col-span-1 space-y-8">
+                        <div class="presensi-form-container">
+                            <h3 class="presensi-section-title"><i class="fas fa-clipboard-check"></i>Formulir & Status Anda</h3>
+                            <p id="current-date-presensi" class="text-sm text-slate-500 mb-4 text-center font-semibold"></p>
+                            <div id="presensi-form-content">
+                                <div class="text-center text-slate-500 py-8">Memuat formulir...</div>
+                            </div>
+                        </div>
+
+                        <div class="presensi-form-container"> <h3 class="presensi-section-title"><i class="fas fa-users"></i>Asisten Piket Hari Ini</h3>
+                            <div id="asisten-piket-hari-ini" class="space-y-3">
+                                <p class="text-center text-slate-500">Memuat data piket...</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-400 p-6 rounded-lg shadow-sm">
+                            <h4 class="text-xl font-bold text-indigo-800 mb-3 flex items-center">
+                                <i class="fas fa-info-circle mr-3"></i>Tips & Pengingat Penting
+                            </h4>
+                            <ul class="list-disc list-inside text-indigo-700 text-sm space-y-2">
+                                <li>Pastikan Anda mengisi presensi pada hari dan jam piket yang telah ditentukan.</li>
+                                <li>Jika ada perubahan jadwal atau kendala, segera informasikan kepada koordinator asisten.</li>
+                                <li>Disiplin presensi mendukung kelancaran operasional laboratorium.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="presensi-form-container"> <h3 class="presensi-section-title"><i class="fas fa-calendar-alt"></i>Kalender Presensi Anda</h3>
+                            <div id="presensi-calendar" class="mb-8">
+                                <div class="text-center text-slate-500 py-8">Memuat kalender...</div>
+                            </div>
+                        </div>
+
+                        <div class="presensi-form-container"> <h4 class="text-lg font-bold text-slate-700 mb-4 border-b pb-2">Detail Riwayat Presensi Anda</h4>
+                            <div class="overflow-x-auto border rounded-lg">
+                                <table class="w-full text-left">
+                                    <thead class="bg-slate-50">
+                                        <tr class="text-sm text-slate-600 uppercase">
+                                            <th class="p-3">Tanggal</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3">Jam Masuk</th>
+                                            <th class="p-3">Jam Keluar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="presensi-history-table-personal">
+                                        <tr><td colspan="4" class="p-4 text-center text-slate-500">Memuat riwayat...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-sky-50 border border-sky-200 text-center flex flex-col items-center justify-center p-5 rounded-xl shadow-sm">
+                            <i class="fas fa-book-open text-sky-600 text-3xl mb-3"></i>
+                            <h4 class="text-xl font-bold text-sky-800 mb-2">Perbarui Logbook Kegiatan Anda</h4>
+                            <p class="text-slate-600 text-sm mb-4">
+                                Setelah piket selesai, jangan lupa catat aktivitas Anda di logbook digital.
+                            </p>
+                            <a href="#" onclick="showPage('logbook')" class="btn btn-primary btn-sm">
+                                <i class="fas fa-arrow-right mr-2"></i>Ke Halaman Logbook
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="logbook" class="main-content">
+            <h2 class="text-3xl font-bold text-slate-800">Logbook Kegiatan</h2>
+            <p class="mt-2 text-slate-600">Catat semua aktivitas penting Anda. Setiap entri akan disimpan dengan stempel waktu otomatis.</p>
+            <hr class="my-6 border-slate-200">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                <div class="lg:col-span-1">
+                    <div class="sticky top-8 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-5 bg-sky-50 border-b border-sky-200">
+                            <h3 class="text-lg font-bold text-sky-800 flex items-center">
+                            <i class="fas fa-pencil-alt mr-3"></i>Buat Catatan Baru
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <form id="form-logbook" class="space-y-5">
+                                <div>
+                                    <label for="logbook-nama" class="block text-sm font-medium text-slate-600 mb-2">Nama Lengkap</label>
+                                    <div class="relative">
+                                        <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                        <input type="text" id="logbook-nama" class="form-input pl-10" required placeholder="Tulis nama Anda...">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="logbook-kegiatan" class="block text-sm font-medium text-slate-600 mb-2">Deskripsi Kegiatan</label>
+                                    <textarea id="logbook-kegiatan" class="form-input" rows="8" required placeholder="Jelaskan kegiatan yang Anda lakukan..."></textarea>
+                                </div>
+                                <button type="submit" class="w-full btn font-bold text-white rounded-lg bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 transform hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-4 focus:ring-sky-300">
+                                    <i class="fas fa-save mr-2"></i>Simpan Catatan
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-5 bg-slate-50 border-b border-slate-200">
+                            <h3 class="text-lg font-bold text-slate-700 flex items-center">
+                                <i class="fas fa-history mr-3"></i>Riwayat Catatan
+                            </h3>
+                        </div>
+                        <div class="p-2 md:p-6">
+                            <div id="logbook-history" class="max-h-[75vh] overflow-y-auto">
+                                <p class="text-center text-slate-500 py-8">Memuat riwayat logbook...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="custom-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            
+            <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
+            <div id="modal-body" class="text-slate-600 mb-6"></div>
+            <div class="flex justify-end space-x-2">
+                <button id="modal-close-btn" class="btn btn-secondary">Tutup</button>
+                <button id="modal-confirm-btn" class="btn btn-primary hidden">Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // =====================================================================
+        // CORE UI FUNCTIONS (Always available)
+        // =====================================================================
+
+        function showModal(title, body, onConfirm = null, options = {}) {
+            document.getElementById('modal-title').innerHTML = title;
+            document.getElementById('modal-body').innerHTML = body;
+            const modal = document.getElementById('custom-modal');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            
+            confirmBtn.className = 'btn btn-primary'; // Back to default
+            if(options.confirmButtonClass) {
+                confirmBtn.classList.remove('btn-primary');
+                confirmBtn.classList.add(...options.confirmButtonClass.split(' '));
+            }
+            confirmBtn.textContent = options.confirmButtonText || 'Konfirmasi';
+            
+            modal.classList.remove('hidden');
+
+            if (onConfirm) {
+                confirmBtn.classList.remove('hidden');
+                const newBtn = confirmBtn.cloneNode(true); // Clone to remove old listeners
+                confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+                newBtn.addEventListener('click', () => {
+                    onConfirm();
+                    hideModal();
+                });
+            } else {
+                confirmBtn.classList.add('hidden');
+            }
+        }
+        function hideModal() { document.getElementById('custom-modal').classList.add('hidden'); }
+        document.getElementById('modal-close-btn').onclick = hideModal;
+
+        window.showPage = function(pageId) {
+            document.querySelectorAll('.main-content').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId)?.classList.add('active');
+            
+            // Remove active from all sidebar links first
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+            // Add active class to the clicked link
+            if (pageId !== 'profil') {
+                const sidebarLink = document.querySelector(`.sidebar-link[onclick="showPage('${pageId}')"]`);
+                if (sidebarLink) {
+                    sidebarLink.classList.add('active');
+                }
+            }
+
+            // If the Presensi page is shown, update the current date
+            if (pageId === 'presensi') {
+                const dateDisplay = document.getElementById('current-date-presensi');
+                if (dateDisplay) {
+                    dateDisplay.textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                }
+            }
+        }
+        function formatTime(timestamp) {
+             if (!timestamp || !timestamp.seconds) return '--:--:--';
+             return new Date(timestamp.seconds * 1000).toLocaleTimeString('id-ID');
+        }
+        function formatDate(timestamp) {
+             if (!timestamp || !timestamp.seconds) return 'N/A';
+             return new Date(timestamp.seconds * 1000).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        function formatDateOnly(timestamp) {
+            if (!timestamp || !timestamp.seconds) return 'Tanggal tidak diketahui';
+            return new Date(timestamp.seconds * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        const dateFormEl = document.getElementById('current-date-form');
+        if(dateFormEl) dateFormEl.textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+
+        // =====================================================================
+        // FIREBASE & DATA LOGIC (Attempt to connect)
+        // =====================================================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBAUQgWF8X-9MCoXZv2OgjVyn8I1dFI6Dw",
+                authDomain: "lstars-website-fakultas.firebaseapp.com",
+                projectId: "lstars-website-fakultas",
+                storageBucket: "lstars-website-fakultas.appspot.com",
+                messagingSenderId: "65681650003",
+                appId: "1:65681650003:web:5033e0d25de163c10a71a6",
+                measurementId: "G-7TQSTCLCTG"
+            };
+
+            
+            if (firebaseConfig.apiKey.includes("...")) {
+                throw new Error("Konfigurasi Firebase belum diatur. Silakan ganti placeholder dengan konfigurasi Anda.");
+            }
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'lstars-webapp-default';
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const auth = getAuth(app);
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    document.getElementById('userIdDisplay').textContent = user.uid;
+                    document.getElementById('profile-user-id').textContent = user.uid;
+                    console.log("User authenticated with UID:", user.uid);
+                    runOnlineFeatures(db, appId, auth);
+                } else {
+                    console.log("User not signed in, attempting authentication.");
+                    const customToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    const authPromise = customToken ? signInWithCustomToken(auth, customToken) : signInAnonymously(auth);
+                    authPromise.catch((error) => {
+                        console.error("Authentication error:", error);
+                        showModal("Error", "Gagal melakukan autentikasi: " + error.message);
+                    });
+                }
+            });
+
+        } catch (error) {
+            console.error("Firebase Initialization Failed:", error.message);
+            showModal("Mode Offline", error.message + " Fitur online tidak akan berfungsi.");
+            document.querySelectorAll('form button[type="submit"]').forEach(button => {
+                button.disabled = true;
+                button.textContent = "Fitur Offline";
+                button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                button.classList.remove('btn-primary', 'hover:bg-sky-700');
+            });
+        }
+
+        // =====================================================================
+        // [FUNGSI UTAMA]
+        // =====================================================================
+        function runOnlineFeatures(db, appId, auth) {
+            const userId = auth.currentUser.uid;
+            const alumniDetails = {};
+            let alumniCounter = 0;
+            
+            let isAdmin = false; // Initial state for admin
+            let lastIzinSnapshot = null;
+
+            // Function to toggle visibility of admin-specific links
+            function toggleAdminMenuLinks(show) {
+                const adminMenuDiv = document.getElementById('admin-menu-links');
+                if (adminMenuDiv) {
+                    if (show) {
+                        adminMenuDiv.classList.remove('hidden');
+                    } else {
+                        adminMenuDiv.classList.add('hidden');
+                    }
+                }
+            }
+
+            function loadCardData(collectionName, elementId, renderFunction) {
+                const q = query(collection(db, `/artifacts/${appId}/public/data/${collectionName}`));
+                onSnapshot(q, (querySnapshot) => {
+                    const container = document.getElementById(elementId);
+                    if (querySnapshot.empty) {
+                        container.innerHTML = `<p class="text-slate-500">Belum ada data. Silakan tambahkan secara manual melalui Konsol Firebase.</p>`;
+                        return;
+                    }
+                    container.innerHTML = '';
+                    querySnapshot.forEach((doc) => { container.innerHTML += renderFunction(doc.data()); });
+                }, (error) => console.error(`Error loading ${collectionName}:`, error));
+            }
+
+            function renderIzinHistory(snapshot) {
+                const container = document.getElementById('izin-history');
+                container.innerHTML = ''; // Clear existing content first
+                if (!snapshot || snapshot.empty) { 
+                    container.innerHTML = '<p class="text-center text-slate-500 py-4">Belum ada riwayat pengajuan izin.</p>'; 
+                    return; 
+                }
+                snapshot.forEach(doc => {
+                    const izin = doc.data();
+                    let statusClass = 'bg-gray-200 text-gray-800';
+                    if (izin.status === 'Disetujui') statusClass = 'bg-emerald-200 text-emerald-800';
+                    if (izin.status === 'Ditolak') statusClass = 'bg-red-200 text-red-800';
+
+                    let actionButtons = `<span class="text-xs text-slate-400">-</span>`;
+                    
+                    if (isAdmin && izin.status === 'Diajukan') {
+                        actionButtons = `
+                                <button onclick="window.updateIzinStatus('${doc.id}', 'Disetujui')" class="btn-sm btn-success mr-1" title="Setujui"><i class="fas fa-check"></i></button>
+                                <button onclick="window.updateIzinStatus('${doc.id}', 'Ditolak')" class="btn-sm btn-danger" title="Tolak"><i class="fas fa-times"></i></button>
+                            `;
+                    }
+
+                    const itemDiv = `
+                        <div class="flex items-center p-3 rounded-lg bg-sky-50 hover:bg-sky-100 transition-all duration-300">
+                            <div class="w-4/12"><p class="font-semibold text-slate-800">${izin.judul || '-'}</p><p class="text-xs text-slate-500 truncate">${izin.deskripsi || ''}</p></div>
+                            <div class="w-3/12"><p class="text-slate-600 text-sm">${izin.pembimbing || '-'}</p></div>
+                            <div class="w-2/12"><p class="text-slate-600 text-sm">${formatDate(izin.tanggalPengajuan)}</p></div>
+                            <div class="w-1/12 text-center"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClass}">${izin.status || 'Diajukan'}</span></div>
+                            <div class="w-2/12 text-center">${actionButtons}</div>
+                        </div>`;
+                    container.innerHTML += itemDiv;
+                });
+            }
+
+            function loadIzinHistory() {
+                const q = query(collection(db, `/artifacts/${appId}/users/${userId}/izinKerja`), orderBy("tanggalPengajuan", "desc"));
+                onSnapshot(q, (snapshot) => {
+                    lastIzinSnapshot = snapshot;
+                    renderIzinHistory(snapshot);
+                }, (error) => {
+                    console.error("Error loading izin history:", error);
+                    document.getElementById('izin-history').innerHTML = `<p class="text-center text-red-500 py-4">Gagal memuat riwayat izin.</p>`;
+                });
+            }
+
+             function renderDetailPage(dosenData) {
+                dosenData.jabatan = "Dosen Teknik Industri";
+                dosenData.sintaId = dosenData.sintaId || "6789123";
+                dosenData.tentang = `Beliau adalah seorang akademisi dan peneliti yang berdedikasi di bidang Teknik Industri. Dengan fokus pada optimasi sistem dan manajemen rantai pasok, beliau aktif membimbing mahasiswa dan telah menerbitkan berbagai karya ilmiah di jurnal bereputasi.`;
+                dosenData.keahlian = ["Optimasi Sistem Manufaktur", "Manajemen Rantai Pasok", "Ergonomi Industri", "Pemodelan & Simulasi Sistem"];
+                dosenData.publikasi = [
+                             { judul: "Application of Lean Six Sigma to Reduce Waste in the Production Process", jurnal: "International Journal of Industrial Engineering", tahun: 2023 },
+                             { judul: "Supply Chain Risk Management Model for SMEs in the Creative Industry", jurnal: "Journal of Operations and Supply Chain Management", tahun: 2022 },
+                             { judul: "The Effect of Work Posture on Musculoskeletal Disorders in Assembly Workers", jurnal: "Jurnal Teknik Industri", tahun: 2021 }
+                         ];
+
+                const namaLengkap = `${dosenData.gelar_depan || ''} ${dosenData.nama || ''} ${dosenData.gelar_belakang || ''}`.trim();
+                const emailName = (dosenData.nama || 'dosen').toLowerCase().replace(/\s/g, '.');
+                const email = `${emailName}@uns.ac.id`;
+
+                const fotoURL = dosenData.fotoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${namaLengkap.replace(/\s/g, '')}&backgroundColor=0ea5e9&radius=50&textColor=fff`;
+                document.getElementById('detail-foto').src = fotoURL;
+
+                document.getElementById('detail-nama-lengkap-card').textContent = namaLengkap;
+                document.getElementById('detail-jabatan-card').textContent = dosenData.jabatan;
+                document.getElementById('detail-nidn-card').textContent = `NIDN: ${dosenData.nidn || '-'}`;
+                document.getElementById('detail-email-card').textContent = email;
+                document.getElementById('detail-sinta-card').textContent = `SINTA ID: ${dosenData.sintaId}`;
+                document.getElementById('detail-tentang').textContent = dosenData.tentang;
+
+                const tabsContainer = document.getElementById('detail-tabs-container');
+                const contentContainer = document.getElementById('detail-tab-content-container');
+                tabsContainer.innerHTML = '';
+                contentContainer.innerHTML = '';
+
+                const tabs = {
+                            'Profil': `
+                                            <div class="space-y-4 text-slate-700">
+                                                <div class="flex border-b pb-2">
+                                                    <p class="w-1/3 font-semibold">Nama Lengkap</p>
+                                                    <p class="w-2/3">${namaLengkap}</p>
+                                                </div>
+                                                <div class="flex border-b pb-2">
+                                                    <p class="w-1/3 font-semibold">NIDN</p>
+                                                    <p class="w-2/3 font-mono">${dosenData.nidn || '-'}</p>
+                                                </div>
+                                                <div class="flex border-b pb-2">
+                                                    <p class="w-1/3 font-semibold">NIP</p>
+                                                    <p class="w-2/3 font-mono">${dosenData.nip || '-'}</p>
+                                                </div>
+                                                <div class="flex">
+                                                    <p class="w-1/3 font-semibold">Homebase</p>
+                                                    <p class="w-2/3">S1 Teknik Industri</p>
+                                                </div>
+                                            </div>
+                                            `,
+                            'Bidang Keahlian': `
+                               <ul class="space-y-3">
+                                   ${dosenData.keahlian.map(item => `
+                                       <li class="flex items-start">
+                                           <i class="fas fa-check-circle text-sky-500 mt-1 mr-3"></i>
+                                           <span>${item}</span>
+                                       </li>
+                                   `).join('')}
+                               </ul>
+                                            `,
+                            'Publikasi': `
+                               <div class="space-y-5">
+                                   ${dosenData.publikasi.map(pub => `
+                                       <div class="border-l-4 border-slate-200 pl-4">
+                                           <h6 class="font-bold text-slate-800">${pub.judul}</h6>
+                                           <p class="text-sm text-slate-500 italic mt-1">${pub.jurnal} (${pub.tahun})</p>
+                                       </div>
+                                   `).join('')}
+                               </div>
+                                            `
+                        };
+
+                        Object.keys(tabs).forEach((key, index) => {
+                               const isActive = index === 0;
+                               tabsContainer.innerHTML += `<button data-tab="${key}" class="tab-btn ${isActive ? 'active' : ''}">${key}</button>`;
+                               contentContainer.innerHTML += `<div id="tab-${key}" class="tab-content ${isActive ? 'active' : ''}">${tabs[key]}</div>`;
+                        });
+
+                        document.querySelectorAll('.tab-btn').forEach(button => {
+                               button.addEventListener('click', () => {
+                                   const tabId = button.dataset.tab;
+                                   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                                   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                                   button.classList.add('active');
+                                   document.getElementById(`tab-${tabId}`).classList.add('active');
+                               });
+                        });
+            }
+
+            function loadDosen() {
+                const q = query(collection(db, `/artifacts/${appId}/public/data/dosen`));
+                let allDosenData = [];
+
+                const container = document.getElementById('dosen-list-container');
+                const filterNidn = document.getElementById('filter-nidn');
+                const filterNama = document.getElementById('filter-nama');
+                const resetBtn = document.getElementById('reset-filter-btn');
+                const pembimbingSelect = document.getElementById('izin-pembimbing');
+
+                function renderList(dataToRender) {
+                    container.innerHTML = ''; // Clear existing content
+                    if (dataToRender.length === 0) {
+                        container.innerHTML = `<p class="text-center text-slate-500 py-4">Data tidak ditemukan.</p>`;
+                        return;
+                    }
+
+                    pembimbingSelect.innerHTML = '<option value="">-- Pilih Dosen Pembimbing --</option>';
+
+                    dataToRender.forEach(dosen => {
+                        const namaLengkap = `${dosen.gelar_depan || ''} ${dosen.nama || ''} ${dosen.gelar_belakang || ''}`.trim();
+                        const dosenDataString = JSON.stringify(dosen).replace(/'/g, "\\'");
+
+                        const itemDiv = `
+                                <div class="flex items-center p-3 rounded-lg bg-sky-50 hover:bg-sky-100 transition-all duration-300 transform hover:scale-[1.02]">
+                                    <div class="w-2/12">
+                                        <p class="font-mono text-slate-600 pl-2">${dosen.nidn || '-'}</p>
+                                    </div>
+                                    <div class="w-4/12">
+                                        <p class="font-semibold text-slate-800 text-base">${namaLengkap}</p>
+                                    </div>
+                                    <div class="w-2/12">
+                                        <p class="font-mono text-slate-600">${dosen.nip || '-'}</p>
+                                    </div>
+                                    <div class="w-2/12 text-center">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-sky-200 text-sky-800">
+                                            S1 Teknik Industri
+                                        </span>
+                                    </div>
+                                    <div class="w-2/12 text-center">
+                                        <button data-dosen='${dosenDataString}' class="btn-sm btn-primary js-dosen-detail">
+                                            Lihat Detail
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        container.innerHTML += itemDiv;
+                        pembimbingSelect.innerHTML += `<option value="${namaLengkap}">${namaLengkap}</option>`;
+                    });
+                }
+
+                function filterAndRender() {
+                    const nidnValue = filterNidn.value.toLowerCase();
+                    const namaValue = filterNama.value.toLowerCase();
+
+                    const filteredData = allDosenData.filter(dosen => {
+                        const namaLengkap = `${dosen.gelar_depan || ''} ${dosen.nama || ''} ${dosen.gelar_belakang || ''}`.toLowerCase();
+                        const nidn = (dosen.nidn || '').toLowerCase();
+                        return nidn.includes(nidnValue) && namaLengkap.includes(namaValue);
+                    });
+                    renderList(filteredData); 
+                }
+
+                onSnapshot(q, (querySnapshot) => {
+                    allDosenData = [];
+                    querySnapshot.forEach((doc) => {
+                        allDosenData.push(doc.data());
+                    });
+                    filterAndRender();  
+                }, (error) => {
+                    console.error("Error loading dosen data: ", error);
+                    container.innerHTML = `<p class="text-center text-red-500 py-4">Gagal memuat data.</p>`;
+                    pembimbingSelect.innerHTML = '<option value="">Gagal memuat data dosen</option>';
+                });
+
+                filterNidn.addEventListener('keyup', filterAndRender);
+                filterNama.addEventListener('keyup', filterAndRender);
+                resetBtn.addEventListener('click', () => {
+                    filterNidn.value = '';
+                    filterNama.value = '';
+                    filterAndRender();
+                });
+                
+                if (!container.hasAttribute('data-listener-added')) {
+                    container.addEventListener('click', function(event) {
+                        const detailButton = event.target.closest('.js-dosen-detail');
+                        if (detailButton) {
+                            const dosenData = JSON.parse(detailButton.dataset.dosen);
+                            renderDetailPage(dosenData);
+                            showPage('dosen-detail');
+                        }
+                    });
+                    container.setAttribute('data-listener-added', 'true');
+                }
+                
+                document.getElementById('back-to-dosen-list').onclick = () => showPage('dosen');
+            }
+
+            // [TAMBAHKAN] Fungsi untuk menampilkan modal Add/Edit Asisten
+            function showAsistenModal(asistenData = null, docId = null) {
+                const isEdit = asistenData && docId;
+                const modalTitle = isEdit ? 'Edit Data Asisten' : 'Tambah Asisten Baru';
+                const confirmButtonText = isEdit ? 'Simpan Perubahan' : 'Tambah Asisten';
+
+                const modalBody = `
+                    <form id="form-asisten-crud" class="space-y-4">
+                        <div>
+                            <label for="asisten-nim" class="block text-sm font-medium text-slate-700">NIM</label>
+                            <input type="text" id="asisten-nim" class="form-input mt-1" required placeholder="Contoh: M0521001" value="${isEdit ? asistenData.nim : ''}">
+                        </div>
+                        <div>
+                            <label for="asisten-nama" class="block text-sm font-medium text-slate-700">Nama Lengkap</label>
+                            <input type="text" id="asisten-nama" class="form-input mt-1" required placeholder="Contoh: Budi Sanjaya" value="${isEdit ? asistenData.nama : ''}">
+                        </div>
+                        <div>
+                            <label for="asisten-angkatan" class="block text-sm font-medium text-slate-700">Angkatan</label>
+                            <input type="number" id="asisten-angkatan" class="form-input mt-1" required placeholder="Contoh: 2021" value="${isEdit ? asistenData.angkatan : ''}">
+                        </div>
+                    </form>
+                `;
+
+                showModal(modalTitle, modalBody, async () => {
+                    const nim = document.getElementById('asisten-nim').value;
+                    const nama = document.getElementById('asisten-nama').value;
+                    const angkatan = document.getElementById('asisten-angkatan').value;
+
+                    if (!nim || !nama || !angkatan) {
+                        showModal("Error", "Semua kolom wajib diisi.");
+                        return;
+                    }
+
+                    const dataToSave = { nim, nama, angkatan };
+                    const asistenCollectionRef = collection(db, `/artifacts/${appId}/public/data/asisten`);
+
+                    try {
+                        if (isEdit) {
+                            const docRef = doc(db, `/artifacts/${appId}/public/data/asisten`, docId);
+                            await updateDoc(docRef, dataToSave);
+                            showModal("Sukses", "Data asisten berhasil diperbarui.");
+                        } else {
+                            await addDoc(asistenCollectionRef, dataToSave);
+                            showModal("Sukses", "Asisten baru berhasil ditambahkan.");
+                        }
+                    } catch (error) {
+                        console.error("Error saving asisten:", error);
+                        showModal("Error", "Gagal menyimpan data: " + error.message);
+                    }
+                }, { confirmButtonClass: 'btn-success', confirmButtonText });
+            }
+
+            // [TAMBAHKAN] Fungsi untuk menghapus Asisten
+            async function deleteAsisten(docId, nama) {
+                showModal(
+                    `Konfirmasi Hapus`,
+                    `Apakah Anda yakin ingin menghapus data asisten <strong>${nama}</strong>? Tindakan ini tidak dapat diurungkan.`,
+                    async () => {
+                        try {
+                            const docRef = doc(db, `/artifacts/${appId}/public/data/asisten`, docId);
+                            await deleteDoc(docRef);
+                            showModal("Sukses", `Data untuk ${nama} telah berhasil dihapus.`);
+                        } catch (error) {
+                            console.error("Error deleting asisten:", error);
+                            showModal("Error", "Gagal menghapus data: " + error.message);
+                        }
+                    },
+                    { confirmButtonClass: 'btn-danger', confirmButtonText: 'Ya, Hapus' }
+                );
+            }
+
+            // [MODIFIKASI] Fungsi loadAsisten dengan fitur CRUD
+            function loadAsisten() {
+                // Tampilkan tombol tambah jika admin
+                const btnTambah = document.getElementById('btn-tambah-asisten');
+                if (isAdmin) {
+                    btnTambah.classList.remove('hidden');
+                } else {
+                    btnTambah.classList.add('hidden');
+                }
+
+                const q = query(collection(db, `/artifacts/${appId}/public/data/asisten`), orderBy("angkatan", "desc"));
+                onSnapshot(q, (querySnapshot) => {
+                    const container = document.getElementById('asisten-list-container');
+                    container.innerHTML = ''; // Clear existing content
+                    if (querySnapshot.empty) {
+                        container.innerHTML = `<p class="text-center text-slate-500 py-4">Belum ada data asisten.</p>`;
+                        return;
+                    }
+                    let counter = 1;
+                    const currentYear = new Date().getFullYear();
+
+                    querySnapshot.forEach((doc) => {
+                        const asisten = doc.data();
+                        const asistenDataString = JSON.stringify(asisten).replace(/'/g, "\\'");
+                        
+                        const angkatan = parseInt(asisten.angkatan);
+                        let status, statusClass;
+
+                        if (angkatan && (currentYear - angkatan <= 4)) {
+                            status = 'Aktif';
+                            statusClass = 'bg-emerald-100 text-emerald-800';
+                        } else {
+                            status = 'Alumni';
+                            statusClass = 'bg-slate-200 text-slate-800';
+                        }
+
+                        // [TAMBAHKAN] Logika untuk tombol Aksi
+                        let actionButtonsHTML = `<span class="text-slate-400">-</span>`; // Default untuk non-admin
+                        if (isAdmin) {
+                            actionButtonsHTML = `
+                                <button class="btn-sm btn-secondary mr-1 js-edit-asisten" data-id="${doc.id}" data-asisten='${asistenDataString}' title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-sm btn-danger js-delete-asisten" data-id="${doc.id}" data-nama="${asisten.nama}" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            `;
+                        }
+
+                        const itemDiv = `
+                            <div class="flex items-center p-3 rounded-lg bg-sky-50">
+                                <div class="w-1/12 text-center">
+                                    <span class="font-bold text-lg text-sky-500">${counter}</span>
+                                </div>
+                                <div class="w-2/12">
+                                    <p class="font-mono text-slate-600">${asisten.nim || '-'}</p>
+                                </div>
+                                <div class="w-4/12">
+                                    <p class="font-semibold text-slate-800 text-base">${asisten.nama || '-'}</p>
+                                </div>
+                                <div class="w-2/12 text-center">
+                                    <p class="font-semibold text-slate-700">${asisten.angkatan || '-'}</p>
+                                </div>
+                                <div class="w-1/12 text-center">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusClass}">
+                                        ${status}
+                                    </span>
+                                </div>
+                                <div class="w-2/12 text-center">
+                                    ${actionButtonsHTML}
+                                </div>
+                            </div>
+                        `;
+                        container.innerHTML += itemDiv;
+                        counter++;
+                    });
+                }, (error) => {
+                    console.error("Error loading asisten data:", error);
+                    const container = document.getElementById('asisten-list-container');
+                    container.innerHTML = `<p class="text-center text-red-500 py-4">Gagal memuat data.</p>`;
+                });
+            }
+
+            function loadDokumentasi() {
+                const q = query(collection(db, `/artifacts/${appId}/public/data/dokumentasi`));
+                let allDokumentasiData = [];
+
+                const galleryContainer = document.getElementById('dokumentasi-list');
+                const filterContainer = document.getElementById('dokumentasi-kategori-filter-container');
+                const loader = document.getElementById('dokumentasi-loader');
+                const infoContainer = document.getElementById('dokumentasi-info');
+                
+                const categoryIcons = {
+                    'Fasilitas': 'fas fa-building',
+                    'Kegiatan': 'fas fa-tasks',
+                    'Pelatihan': 'fas fa-chalkboard-teacher',
+                    'Penelitian': 'fas fa-flask',
+                    'Event': 'fas fa-calendar-alt',
+                    'Penghargaan': 'fas fa-award',
+                    'default': 'fas fa-tag'
+                };
+
+                function renderGallery(dataToRender) {
+                    loader.style.display = 'none';
+                    galleryContainer.innerHTML = '';
+                    
+                    infoContainer.innerHTML = `<i class="fas fa-info-circle text-sky-600 mr-2"></i> ${dataToRender.length} dokumentasi tersedia. Klik pada foto untuk melihat detail lengkap.`;
+
+                    if (dataToRender.length === 0) {
+                        galleryContainer.innerHTML = `
+                                <div class="col-span-full">
+                                    <div class="bg-white rounded-lg p-8 text-center border">
+                                        <i class="fas fa-images fa-3x text-slate-300 mb-4"></i>
+                                        <h4 class="text-xl font-bold text-slate-700">Galeri Kosong</h4>
+                                        <p class="text-slate-500 mt-2">Tidak ada dokumentasi untuk kategori yang dipilih.</p>
+                                    </div>
+                                </div>
+                            `;
+                        return;
+                    }
+
+                    dataToRender.forEach(data => {
+                        const deskripsi = data.deskripsi || 'Dokumentasi kegiatan yang dilakukan di laboratorium.';
+                        const cardHTML = `
+                                <div class="bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col doc-card">
+                                    <a href="#" class="block bg-slate-100 p-4 cursor-pointer">
+                                        <img src="${data.fotoURL || 'https://placehold.co/400x200/f1f5f9/64748b?text=LPSKE'}" alt="Foto ${data.nama_kegiatan}" class="w-full h-40 object-contain">
+                                    </a>
+                                    <div class="p-4 flex flex-col flex-grow">
+                                        <h3 class="text-base font-bold text-slate-800 mb-2">${data.nama_kegiatan || 'Nama Kegiatan'}</h3>
+                                        <p class="text-sm text-slate-600 mb-4 flex-grow">${deskripsi}</p>
+                                        <div class="text-sm border-t pt-3 mt-auto flex justify-between items-center">
+                                            <span class="font-medium text-sky-600 px-2 py-0.5 bg-sky-100 rounded-full text-xs">${data.kategori || 'Umum'}</span>
+                                            <span class="font-mono text-slate-500 text-xs">${formatDateOnly(data.tanggal)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        galleryContainer.innerHTML += cardHTML;
+                    });
+                }
+
+                function filterAndRender(selectedCategory) {
+                    const dataToRender = selectedCategory === 'semua'
+                        ? allDokumentasiData
+                        : allDokumentasiData.filter(item => item.kategori === selectedCategory);
+                    renderGallery(dataToRender);
+                }
+                
+                if (!filterContainer.hasAttribute('data-listener-added')) {
+                    filterContainer.addEventListener('click', (e) => {
+                        const button = e.target.closest('button.kategori-filter-btn');
+                        if (button) {
+                            const selectedCategory = button.dataset.kategori;
+                            filterContainer.querySelectorAll('.kategori-filter-btn').forEach(btn => btn.classList.remove('active'));
+                            button.classList.add('active');
+                            filterAndRender(selectedCategory);
+                        }
+                    });
+                    filterContainer.setAttribute('data-listener-added', 'true');
+                }
+                
+                onSnapshot(q, (querySnapshot) => {
+                    allDokumentasiData = [];
+                    const categories = new Set();
+
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        allDokumentasiData.push(data);
+                        if (data.kategori) categories.add(data.kategori);
+                    });
+                    
+                    allDokumentasiData.sort((a, b) => (b.tanggal?.seconds || 0) - (a.tanggal?.seconds || 0));
+                    
+                    filterContainer.innerHTML = ''; 
+
+                    const allButton = document.createElement('button');
+                    allButton.className = 'kategori-filter-btn active';
+                    allButton.innerHTML = `<i class="fas fa-grip-horizontal w-5 mr-2"></i> Semua`;
+                    allButton.dataset.kategori = 'semua';
+                    filterContainer.appendChild(allButton);
+
+                    categories.forEach(cat => {
+                        const catButton = document.createElement('button');
+                        const iconClass = categoryIcons[cat] || categoryIcons['default'];
+                        catButton.className = 'kategori-filter-btn';
+                        catButton.innerHTML = `<i class="${iconClass} w-5 mr-2"></i> ${cat}`;
+                        catButton.dataset.kategori = cat;
+                        filterContainer.appendChild(catButton);
+                    });
+                    
+                    filterAndRender('semua');
+
+                }, (error) => {
+                    console.error("Error loading dokumentasi data: ", error);
+                    loader.style.display = 'none';
+                    galleryContainer.innerHTML = `<p class="col-span-full text-center text-red-500 py-4">Gagal memuat data dokumentasi.</p>`;
+                    filterContainer.innerHTML = `<p class="text-red-500">Gagal memuat kategori.</p>`;
+                });
+            }
+
+            function loadAlumni() {
+                loadCardData('alumni', 'alumni-list', (data) => {
+                    const alumniId = `alumni-${alumniCounter}`;
+                    alumniDetails[alumniId] = data;
+                    
+                    const cardHTML = `
+                    <div onclick="showAlumniDetail('${alumniId}')" class="card bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden cursor-pointer group">
+                        <i class="fas fa-quote-right text-8xl text-slate-100 absolute -top-4 -right-4 z-0"></i>
+                        <div class="relative z-10 flex flex-col items-center text-center h-full">
+                            <img src="${data.fotoURL || 'https://placehold.co/100x100/e2e8f0/64748b?text=Alumni'}" alt="Foto ${data.nama}" class="w-24 h-24 rounded-full object-cover shadow-md border-4 border-white mb-4">
+                            <div class="mb-4">
+                                <h4 class="text-xl font-bold text-slate-800">${data.nama}</h4>
+                                <p class="font-semibold text-sky-600">${data.pekerjaan || 'Pekerjaan Alumni'}</p>
+                                <p class="text-sm text-slate-500">Angkatan ${data.angkatan || 'N/A'}</p>
+                            </div>
+                            <blockquote class="text-slate-600 italic border-t border-slate-200 pt-4 mt-2 flex-grow w-full text-left line-clamp-3 group-hover:line-clamp-none">
+                                ${data.cerita || 'Cerita inspiratif dari alumni.'}
+                            </blockquote>
+                        </div>
+                    </div>
+                    `;
+                    alumniCounter++;
+                    return cardHTML;
+                });
+            }
+
+            function showAlumniDetail(alumniId) {
+                const data = alumniDetails[alumniId];
+                if (!data) return;
+
+                const modalTitle = `Kisah Alumni: ${data.nama}`;
+                const modalBody = `
+                    <div class="flex flex-col text-left">
+                        <div class="flex items-center mb-4">
+                            <img src="${data.fotoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${data.nama.replace(/\s/g, '')}&backgroundColor=0ea5e9&radius=50&textColor=fff`}" alt="Foto ${data.nama}" class="w-16 h-16 rounded-full object-cover mr-4">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-800">${data.nama}</h4>
+                                <p class="font-semibold text-sky-600">${data.pekerjaan || 'Pekerjaan Alumni'}</p>
+                                <p class="text-sm text-slate-500">Angkatan ${data.angkatan || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <p class="text-slate-600 leading-relaxed whitespace-pre-wrap">${data.cerita || 'Cerita inspiratif dari alumni.'}</p>
+                    </div>
+                `;
+                showModal(modalTitle, modalBody);
+            }
+            window.showAlumniDetail = showAlumniDetail;
+
+            function loadInventoryAndPinjamOptions() {
+                // Initial static data for demonstration. In a real app, this would come from Firestore.
+                const inventoryData = [
+                    { id: 'AA01', nama: 'Jangka Sorong', total: 16, tersedia: 16, satuan: 'Unit', kondisi: 'Baik', keterangan: '8 Hitam, 8 Putih' },
+                    { id: 'AA02', nama: 'Micrometer sekrup', total: 16, tersedia: 16, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA03', nama: 'Timbangan', total: 7, tersedia: 7, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA04', nama: 'Thermometer', total: 3, tersedia: 2, satuan: 'Unit', kondisi: 'Baik', keterangan: '2 Baik, 1 rusak' }, // 1 rusak, so 2 available
+                    { id: 'AA05', nama: 'Neraca 4 Lengan', total: 2, tersedia: 2, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA06', nama: 'Neraca 3 Lengan (Ohauss)', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA07', nama: 'Beban Gantung (Biru)', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA08', nama: 'Power Supply', total: 4, tersedia: 4, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA09', nama: 'Gelas Ukur 500ml', total: 8, tersedia: 8, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA10', nama: 'Gelas Ukur 500ml dengan tutup', total: 9, tersedia: 9, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA11', nama: 'Gelas ukur 100ml', total: 5, tersedia: 5, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA12', nama: 'Ticket Timer (Aman)', total: 5, tersedia: 5, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA13', nama: 'Ticket Timer (Rusak)', total: 2, tersedia: 0, satuan: 'Unit', kondisi: 'Rusak', keterangan: '' }, // 0 available because broken
+                    { id: 'AA14', nama: 'Katrol Tali', total: 3, tersedia: 3, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA15', nama: 'Katrol Tali', total: 1, tersedia: 0, satuan: 'Unit', kondisi: 'Rusak', keterangan: '' }, // 0 available because broken
+                    { id: 'AA16', nama: 'Water Heater', total: 5, tersedia: 5, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA17', nama: 'Water Heater', total: 4, tersedia: 4, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA18', nama: 'Mistar (Penggaris) 30 cm', total: 6, tersedia: 6, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA19', nama: 'Gelas Ukur 250 ml', total: 4, tersedia: 4, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA20', nama: 'Penggaris Busur', total: 8, tersedia: 8, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA21', nama: 'Penggaris 20 cm', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA22', nama: 'Project Board', total: 17, tersedia: 17, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA23', nama: 'Jangka', total: 2, tersedia: 2, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA24', nama: 'Penggaris segitiga 28 cm', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA25', nama: 'Tali Katrol', total: 8, tersedia: 8, satuan: 'Bendel', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA26', nama: 'Silinder berongga', total: 7, tersedia: 7, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA27', nama: 'Silinder pejal', total: 7, tersedia: 7, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA28', nama: 'Silinder kompleks', total: 8, tersedia: 8, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA29', nama: 'Gelas Minum', total: 6, tersedia: 6, satuan: 'Unit', kondisi: 'Baik', keterangan: '4 Kaca 2 Plastik' },
+                    { id: 'AA30', nama: 'Galon Kosongan', total: 8, tersedia: 8, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA31', nama: 'Piring Plastik', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA32', nama: 'Nampan kayu', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA33', nama: 'Water Heater CTL-200 (Cosmos)', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA34', nama: 'Multimeter', total: 4, tersedia: 4, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA35', nama: 'Pinset', total: 5, tersedia: 5, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA36', nama: 'Mobil Mainan', total: 14, tersedia: 14, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA37', nama: 'Stopwatch', total: 16, tersedia: 16, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA38', nama: 'Wearpack', total: 9, tersedia: 9, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA39', nama: 'Topi Toyota', total: 12, tersedia: 12, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA40', nama: 'Dispenser', total: 1, tersedia: 0, satuan: 'Unit', kondisi: 'Rusak', keterangan: '' }, // 0 available because broken
+                    { id: 'AA41', nama: 'Helm Proyek', total: 4, tersedia: 4, satuan: 'Unit', kondisi: 'Baik', keterangan: '' },
+                    { id: 'AA42', nama: 'Pompa galon elektrik', total: 1, tersedia: 1, satuan: 'Unit', kondisi: 'Baik', keterangan: '' }
+                ];
+
+
+                const tableBody = document.getElementById('inventory-table');
+                const pinjamSelect = document.getElementById('pinjam-alat');
+
+                tableBody.innerHTML = '';
+                pinjamSelect.innerHTML = '<option value="">-- Pilih Alat/Ruang --</option>';
+
+                if (inventoryData.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">Data inventaris tidak ditemukan.</td></tr>`;
+                    pinjamSelect.innerHTML = '<option value="">Tidak ada alat tersedia</option>';
+                    return;
+                }
+
+                inventoryData.forEach(item => {
+                    let kondisiClass = '';
+                    if (item.kondisi === 'Baik') {
+                        kondisiClass = 'bg-emerald-100 text-emerald-800';
+                    } else if (item.kondisi === 'Rusak') {
+                        kondisiClass = 'bg-red-100 text-red-800';
+                    } else {
+                        kondisiClass = 'bg-slate-100 text-slate-800';
+                    }
+
+                    const rowHTML = `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-4 font-mono text-sm text-slate-700">${item.id}</td>
+                            <td class="p-4 font-semibold text-slate-800">${item.nama}</td>
+                            <td class="p-4 text-center">
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${kondisiClass}">
+                                    ${item.kondisi}
+                                </span>
+                            </td>
+                            <td class="p-4 text-center text-slate-600">${item.tersedia} ${item.satuan}</td>
+                            <td class="p-4 text-center text-slate-600">${item.total} ${item.satuan}</td>
+                            <td class="p-4 text-sm text-slate-500">${item.keterangan || '-'}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += rowHTML;
+
+                    // Only add to borrow options if available quantity > 0
+                    if (item.tersedia > 0) {
+                        pinjamSelect.innerHTML += `<option value="${item.id}" data-nama="${item.nama}" data-tersedia="${item.tersedia}">${item.nama} (ID: ${item.id}, Tersedia: ${item.tersedia})</option>`;
+                    }
+                });
+            }
+
+            function loadUserPeminjaman() {
+                // This function now primarily handles the list for Pengembalian page for admin,
+                // and potentially a summary for the user's profile if applicable.
+                
+                let qPeminjaman;
+                if (isAdmin) {
+                    // If admin, load all currently borrowed items for the "Pengembalian" page
+                    qPeminjaman = query(collection(db, `/artifacts/${appId}/public/data/peminjaman`), where("status", "==", "Dipinjam"));
+                } else {
+                    // For regular users, load only their own borrowed items for their profile summary
+                    qPeminjaman = query(collection(db, `/artifacts/${appId}/public/data/peminjaman`), where("peminjamId", "==", userId), where("status", "==", "Dipinjam"));
+                }
+                
+                onSnapshot(qPeminjaman, (snapshot) => {
+                    const listContainer = document.getElementById('pengembalian-list');
+                    const profileSummaryContainer = document.getElementById('profile-peminjaman-summary');
+                    
+                    listContainer.innerHTML = ''; // Clear existing content for the main list
+                    profileSummaryContainer.innerHTML = ''; // Clear existing content for the profile summary
+
+                    if (snapshot.empty) { 
+                        const noDataMessage = '<p class="text-slate-500 card bg-slate-50 text-center py-4">Tidak ada alat yang sedang dipinjam.</p>';
+                        const noDataMessageTable = '<tr><td colspan="6" class="p-6 text-center text-slate-500">Tidak ada alat yang sedang dipinjam. 🎉</td></tr>'
+                        listContainer.innerHTML = noDataMessageTable;
+                        profileSummaryContainer.innerHTML = noDataMessage;
+                        return; 
+                    }
+                    
+                    let counter = 1;
+                    snapshot.forEach(doc => {
+                        const peminjaman = doc.data();
+                        
+                        // Always add to the main 'pengembalian-list' since it's the admin view or the user's list
+                        const rowHTML = `
+                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                    <td class="p-4 text-center font-medium text-slate-600">${counter}</td>
+                                    <td class="p-4 font-semibold text-slate-800">${peminjaman.namaAlat}</td>
+                                    <td class="p-4 text-slate-600 text-sm">
+                                        <div class="font-medium text-slate-800">${peminjaman.namaPeminjam}</div>
+                                        <div class="font-mono text-xs">${peminjaman.nimPeminjam || '-'}</div>
+                                    </td>
+                                    <td class="p-4 text-slate-600 text-sm">${peminjaman.keperluan}</td>
+                                    <td class="p-4 text-slate-500 text-sm">${formatDate(peminjaman.tanggalPinjam)}</td>
+                                    <td class="p-4 text-center">
+                                        <button class="btn-sm btn-success js-kembalikan-btn" data-peminjaman-id="${doc.id}" data-alat-id="${peminjaman.alatId}">
+                                            <i class="fas fa-undo mr-1"></i> Kembalikan
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        listContainer.innerHTML += rowHTML;
+                        counter++;
+
+                        // Only add to profile summary if it's the current user's borrowing
+                        if (peminjaman.peminjamId === userId) {
+                            const summaryDiv = document.createElement('div');
+                            summaryDiv.className = 'card flex justify-between items-center p-4 bg-sky-50';
+                            summaryDiv.innerHTML = `<div><h4 class="font-semibold text-sky-800">${peminjaman.namaAlat}</h4><p class="text-xs text-slate-500">Dipinjam pada: ${formatDate(peminjaman.tanggalPinjam)}</p></div><button class="btn-sm btn-primary" onclick="showPage('pengembalian')">Lihat</button>`;
+                            profileSummaryContainer.appendChild(summaryDiv);
+                        }
+                    });
+                }, (error) => console.error("Error loading user peminjaman:", error));
+            }
+
+            const pengembalianContainer = document.getElementById('pengembalian-list');
+            if (!pengembalianContainer.hasAttribute('data-listener-added')) {
+                pengembalianContainer.addEventListener('click', (event) => {
+                    const button = event.target.closest('.js-kembalikan-btn');
+                    if (button) {
+                        const peminjamanId = button.dataset.peminjamanId;
+                        const alatId = button.dataset.alatId;
+                        kembalikanAlat(peminjamanId, alatId);
+                    }
+                });
+                pengembalianContainer.setAttribute('data-listener-added', 'true');
+            }
+            
+            async function updateIzinStatus(docId, newStatus) {
+                const izinRef = doc(db, `/artifacts/${appId}/users/${userId}/izinKerja`, docId);
+                try {
+                    await updateDoc(izinRef, { status: newStatus });
+                    showModal("Sukses", `Status pengajuan berhasil diubah menjadi ${newStatus}.`);
+                } catch (error) {
+                    showModal("Error", "Gagal memperbarui status: " + error.message);
+                    console.error("Error updating status: ", error);
+                }
+            }
+            window.updateIzinStatus = updateIzinStatus;
+
+            // --- [MODIFIKASI TOTAL] Ganti semua fungsi presensi lama dengan yang baru ini ---
+
+            // Variabel global untuk kalender
+            let currentYear = new Date().getFullYear();
+            let currentMonth = new Date().getMonth();
+
+            // Fungsi utama untuk menginisialisasi seluruh halaman presensi
+            async function initializePresensiPage(db, userId) {
+                // Update the current date display
+                const dateDisplay = document.getElementById('current-date-presensi');
+                if (dateDisplay) {
+                    dateDisplay.textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                }
+
+                await renderPresensiForm(db, userId); // Await this to ensure form state is ready
+                renderAsistenPiketHariIni(db);
+                await renderPresensiCalendar(db, userId, currentYear, currentMonth);
+                await renderPersonalHistoryTable(db, userId);
+            }
+
+            // 1. Merender formulir presensi yang cerdas
+            async function renderPresensiForm(db, userId) {
+                const container = document.getElementById('presensi-form-content');
+                const todayStr = new Date().toISOString().split('T')[0];
+                
+                // Cek status presensi hari ini
+                const q = query(collection(db, `/artifacts/${appId}/public/data/presensi`), 
+                    where("userId", "==", userId), 
+                    where("tanggal", "==", todayStr));
+                const snapshot = await getDocs(q);
+
+                let contentHTML = '';
+                
+                if (snapshot.empty) {
+                    // Belum presensi, tampilkan formulir lengkap
+                    contentHTML = `
+                        <p class="text-sm text-slate-600 mb-4">Anda belum melakukan presensi hari ini. Silakan isi formulir di bawah.</p>
+                        <form id="presensi-form" class="space-y-4">
+                            <div>
+                                <label for="presensi-status" class="block font-semibold text-slate-700 mb-2">Status Kehadiran</label>
+                                <select id="presensi-status" class="form-input" required>
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="Hadir">Hadir</option>
+                                    <option value="Izin">Izin</option>
+                                    <option value="Sakit">Sakit</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="presensi-nim" class="block font-semibold text-slate-700 mb-2">NIM</label>
+                                <input type="text" id="presensi-nim" class="form-input" required placeholder="NIM Anda">
+                            </div>
+                            <div>
+                                <label for="presensi-nama" class="block font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+                                <input type="text" id="presensi-nama" class="form-input" required placeholder="Nama Lengkap Anda">
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="btn btn-primary w-full flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i>Simpan Presensi
+                                </button>
+                            </div>
+                            <p id="presensi-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
+                        </form>
+                    `;
+                } else {
+                    const data = snapshot.docs[0].data();
+                    let statusBadgeClass = '';
+                    if (data.status === 'Hadir') statusBadgeClass = 'bg-emerald-100 text-emerald-800';
+                    else if (data.status === 'Izin') statusBadgeClass = 'bg-amber-100 text-amber-800';
+                    else if (data.status === 'Sakit') statusBadgeClass = 'bg-red-100 text-red-800';
+
+                    if (data.status === 'Hadir' && !data.jamKeluar) {
+                        // Checked-in but not yet checked-out
+                        contentHTML = `
+                            <div class="text-center space-y-3 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                                <p class="text-lg font-semibold text-emerald-700">Presensi Hari Ini: Check-In Berhasil!</p>
+                                <p class="text-sm text-emerald-600">
+                                    Anda telah masuk pada: <br class="sm:hidden"> <strong>${formatDate(data.jamMasuk)}</strong>
+                                </p>
+                                <p class="font-semibold text-slate-700">Status Anda: <span class="presensi-status-badge ${statusBadgeClass}">${data.status}</span></p>
+                                <button id="checkout-button" class="btn btn-danger w-full flex items-center justify-center mt-4">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Check-Out Sekarang
+                                </button>
+                                <p id="presensi-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
+                            </div>
+                        `;
+                    } else {
+                        // Already completed (Izin, Sakit, or already checked out)
+                        contentHTML = `
+                            <div class="text-center space-y-3 p-4 bg-slate-100 rounded-lg border border-slate-200">
+                                <p class="text-lg font-semibold text-slate-700">Presensi Hari Ini Telah Selesai.</p>
+                                <p class="text-sm text-slate-600">
+                                    Status Anda: <span class="presensi-status-badge ${statusBadgeClass}">${data.status}</span><br>
+                                    ${data.jamMasuk ? `Masuk: ${formatTime(data.jamMasuk)}` : ''}
+                                    ${data.jamKeluar ? ` | Keluar: ${formatTime(data.jamKeluar)}` : ''}
+                                </p>
+                                <p id="presensi-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
+                            </div>
+                        `;
+                    }
+                }
+                
+                container.innerHTML = contentHTML;
+
+                const form = document.getElementById('presensi-form');
+                if (form) {
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const status = document.getElementById('presensi-status').value;
+                        const nim = document.getElementById('presensi-nim').value;
+                        const nama = document.getElementById('presensi-nama').value;
+                        const errorMessageElement = document.getElementById('presensi-error-message');
+
+                        if (!status || !nim || !nama) {
+                            errorMessageElement.textContent = "Harap isi semua kolom untuk melanjutkan.";
+                            errorMessageElement.classList.remove('hidden');
+                            return;
+                        }
+                        errorMessageElement.classList.add('hidden');
+                        await savePresensi(db, userId, nim, nama, status, todayStr);
+                    });
+                }
+
+                const checkoutBtn = document.getElementById('checkout-button');
+                if (checkoutBtn) {
+                    checkoutBtn.addEventListener('click', async () => {
+                        const errorMessageElement = document.getElementById('presensi-error-message');
+                        errorMessageElement.classList.add('hidden'); // Clear previous error
+                        await checkoutPresensi(db, snapshot.docs[0].id, userId);
+                    });
+                }
+            }
+
+            // 2. Merender daftar asisten yang piket hari ini
+            function renderAsistenPiketHariIni(db) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const container = document.getElementById('asisten-piket-hari-ini');
+                
+                const q = query(collection(db, `/artifacts/${appId}/public/data/presensi`), 
+                    where("tanggal", "==", todayStr), 
+                    where("status", "==", "Hadir"));
+
+                onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        container.innerHTML = '<p class="text-center text-slate-500 py-4">Belum ada asisten yang piket hari ini.</p>';
+                        return;
+                    }
+                    
+                    container.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const isCheckedOut = data.jamKeluar;
+                        const timeDisplay = isCheckedOut ? 
+                            `<span class="text-slate-500">Selesai ${formatTime(data.jamKeluar)}</span>` : 
+                            `<span class="text-emerald-500">Masuk ${formatTime(data.jamMasuk)}</span>`;
+
+                        const itemHTML = `
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div>
+                                    <p class="font-semibold text-slate-800">${data.namaAsisten}</p>
+                                    <p class="text-xs text-slate-500">NIM: ${data.nim}</p>
+                                </div>
+                                <div class="text-right">
+                                    ${timeDisplay}
+                                    <span class="block px-2 py-0.5 text-xs font-medium rounded-full ${isCheckedOut ? 'bg-slate-200 text-slate-600' : 'bg-emerald-100 text-emerald-700'} mt-1">
+                                        ${isCheckedOut ? 'Check-out' : 'Aktif'}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                        container.innerHTML += itemHTML;
+                    });
+                });
+            }
+
+            // 3. Merender kalender interaktif
+            async function renderPresensiCalendar(db, userId, year, month) {
+                const container = document.getElementById('presensi-calendar');
+                const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const firstDayIndex = firstDay.getDay();
+                const numDays = lastDay.getDate();
+
+                // Fetch data untuk bulan ini
+                const monthStr = (month + 1).toString().padStart(2, '0');
+                const startDate = `${year}-${monthStr}-01`;
+                const endDate = `${year}-${monthStr}-${numDays}`;
+                const q = query(collection(db, `/artifacts/${appId}/public/data/presensi`), 
+                    where("userId", "==", userId), 
+                    where("tanggal", ">=", startDate), 
+                    where("tanggal", "<=", endDate));
+                    
+                const snapshot = await getDocs(q);
+                const presensiData = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const day = parseInt(data.tanggal.split('-')[2]);
+                    presensiData[day] = data.status.toLowerCase();
+                });
+
+                let calendarHTML = `
+                    <div class="calendar-header">
+                        <button id="prev-month-btn" class="btn btn-sm btn-secondary"><i class="fas fa-chevron-left"></i></button>
+                        <h4 class="text-lg font-bold text-slate-800">${monthNames[month]} ${year}</h4>
+                        <button id="next-month-btn" class="btn btn-sm btn-secondary"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid">
+                        ${dayNames.map(name => `<div class="calendar-day-name">${name}</div>`).join('')}
+                `;
+
+                for (let i = 0; i < firstDayIndex; i++) {
+                    calendarHTML += `<div></div>`;
+                }
+
+                const today = new Date();
+                const todayDate = today.getDate();
+                const todayMonth = today.getMonth();
+                const todayYear = today.getFullYear();
+
+                for (let day = 1; day <= numDays; day++) {
+                    let classes = 'day-cell';
+                    if (day === todayDate && month === todayMonth && year === todayYear) {
+                        classes += ' today';
+                    }
+                    if (presensiData[day]) {
+                        classes += ` ${presensiData[day]}`;
+                    }
+                    calendarHTML += `<div class="${classes}">${day}</div>`;
+                }
+
+                calendarHTML += '</div>'; // close calendar-grid
+                container.innerHTML = calendarHTML;
+                
+                document.getElementById('prev-month-btn').onclick = () => {
+                    currentMonth--;
+                    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                    renderPresensiCalendar(db, userId, currentYear, currentMonth);
+                };
+                document.getElementById('next-month-btn').onclick = () => {
+                    currentMonth++;
+                    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                    renderPresensiCalendar(db, userId, currentYear, currentMonth);
+                };
+            }
+
+            // 4. Merender tabel riwayat personal
+            async function renderPersonalHistoryTable(db, userId) {
+                const container = document.getElementById('presensi-history-table-personal');
+                const q = query(collection(db, `/artifacts/${appId}/public/data/presensi`), 
+                    where("userId", "==", userId), 
+                    orderBy("tanggal", "desc"),
+                    limit(10)); // Hanya tampilkan 10 riwayat terakhir
+
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    container.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">Anda belum memiliki riwayat presensi.</td></tr>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let statusClass = '';
+                    if (data.status === 'Hadir') statusClass = 'bg-emerald-100 text-emerald-800';
+                    else if (data.status === 'Izin') statusClass = 'bg-amber-100 text-amber-800';
+                    else if (data.status === 'Sakit') statusClass = 'bg-red-100 text-red-800';
+
+                    container.innerHTML += `
+                        <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                            <td class="p-3 font-medium text-slate-700">${data.tanggal}</td>
+                            <td class="p-3"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClass}">${data.status}</span></td>
+                            <td class="p-3 text-slate-600">${data.jamMasuk ? formatTime(data.jamMasuk) : '-'}</td>
+                            <td class="p-3 text-slate-600">${data.jamKeluar ? formatTime(data.jamKeluar) : '-'}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Fungsi untuk menyimpan presensi baru (check-in, izin, sakit)
+            async function savePresensi(db, userId, nim, nama, status, date) {
+                const presensiCollection = collection(db, `/artifacts/${appId}/public/data/presensi`);
+                const dataToSave = {
+                    userId, nim, namaAsisten: nama, tanggal: date, status,
+                    jamMasuk: status === 'Hadir' ? serverTimestamp() : null,
+                    jamKeluar: null
+                };
+                try {
+                    await addDoc(presensiCollection, dataToSave);
+                    showModal("Sukses", `Presensi ${status} berhasil disimpan.`);
+                    // Reload seluruh halaman presensi untuk update UI
+                    initializePresensiPage(db, userId);
+                } catch (error) {
+                    showModal("Error", "Gagal menyimpan presensi: " + error.message);
+                    console.error(error);
+                }
+            }
+
+            // Fungsi untuk checkout
+            async function checkoutPresensi(db, docId, userId) {
+                try {
+                    const docRef = doc(db, `/artifacts/${appId}/public/data/presensi`, docId);
+                    await updateDoc(docRef, { jamKeluar: serverTimestamp() });
+                    showModal("Sukses", "Check-out berhasil!");
+                    // Reload seluruh halaman presensi untuk update UI
+                    initializePresensiPage(db, userId);
+                } catch (error) {
+                    showModal("Error", "Gagal check-out: " + error.message);
+                    console.error(error);
+                }
+            }
+            // --- Akhir dari fungsi presensi yang baru ---
+
+            function loadLogbookHistory() {
+                const logbookCollection = collection(db, `/artifacts/${appId}/users/${userId}/logbook`);
+                const q = query(logbookCollection, orderBy("timestamp", "desc"));
+                
+                onSnapshot(q, (snapshot) => {
+                    const historyContainer = document.getElementById('logbook-history');
+                    const profileSummaryContainer = document.getElementById('profile-logbook-summary');
+                    
+                    historyContainer.innerHTML = '';
+                    profileSummaryContainer.innerHTML = '';
+
+                    if (snapshot.empty) { 
+                        const noDataMsg = '<div class="card text-center"><p class="text-slate-500">Belum ada catatan logbook.</p></div>';
+                        historyContainer.innerHTML = noDataMsg;
+                        profileSummaryContainer.innerHTML = noDataMsg.replace('card', 'card bg-slate-50 py-4');
+                        return; 
+                    }
+                    
+                    historyContainer.className = 'timeline-container';
+                    
+                    snapshot.docs.forEach((doc, index) => {
+                        const log = doc.data();
+                        
+                        // === [MODIFIED] Updated timeline item to include name ===
+                        const itemDiv = `
+                        <div class="timeline-item">
+                            <div class="timeline-icon"><i class="fas fa-book-open fa-lg"></i></div>
+                            <div class="timeline-card p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-800">${log.nama || 'Anonim'}</h4>
+                                    <p class="timeline-card-time text-right">${formatDate(log.timestamp)}</p>
+                                </div>
+                                <p class="timeline-card-body">${log.kegiatan}</p>
+                            </div>
+                        </div>`;
+                        historyContainer.innerHTML += itemDiv;
+                        // === End Modification ===
+
+                        if (index < 3) {
+                            const summaryDiv = document.createElement('div');
+                            summaryDiv.className = 'card p-4 bg-sky-50';
+                            // === [MODIFIED] Updated profile summary to include name ===
+                            summaryDiv.innerHTML = `
+                                <p class="font-semibold text-sky-800 text-sm truncate" title="${log.nama}: ${log.kegiatan.split('\\n')[0]}">
+                                    <strong class="text-sky-900">${log.nama || 'Anonim'}:</strong> ${log.kegiatan.split('\n')[0]}
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">${formatDate(log.timestamp)}</p>
+                            `;
+                            // === End Modification ===
+                            profileSummaryContainer.appendChild(summaryDiv);
+                        }
+                    });
+                }, (error) => {
+                    console.error("Error loading logbook history:", error);
+                    const errorMsg = '<div class="card text-center text-red-500"><p>Gagal memuat riwayat logbook.</p></div>';
+                    document.getElementById('logbook-history').innerHTML = errorMsg;
+                    document.getElementById('profile-logbook-summary').innerHTML = errorMsg;
+
+                });
+            }
+
+            function updateAdminButtonUI() {
+                const adminBtn = document.getElementById('admin-login-btn');
+                if (isAdmin) {
+                    adminBtn.innerHTML = `<i class="fas fa-user-shield mr-2"></i><span class="sidebar-text-content"> Logout Admin</span>`;
+                    adminBtn.classList.remove('btn-primary');
+                    adminBtn.classList.add('btn-danger');
+                } else {
+                    adminBtn.innerHTML = `<i class="fas fa-user-shield mr-2"></i><span class="sidebar-text-content"> Login Admin</span>`;
+                    adminBtn.classList.remove('btn-danger');
+                    adminBtn.classList.add('btn-primary');
+                }
+                toggleAdminMenuLinks(isAdmin);
+            }
+            
+            // [MODIFIKASI] handleAdminLogin sekarang memiliki form username & password
+            function handleAdminLogin() {
+                if (isAdmin) {
+                    showModal(
+                        "Konfirmasi Logout", 
+                        "Apakah Anda yakin ingin keluar dari mode admin?", 
+                        () => {
+                            isAdmin = false;
+                            showModal("Logout Berhasil", "Anda telah keluar dari mode admin.");
+                            updateAdminButtonUI();
+                            if (lastIzinSnapshot) {
+                                renderIzinHistory(lastIzinSnapshot);
+                            }
+                            loadAsisten(); // <-- [MODIFIKASI]
+                            if (document.getElementById('peminjaman').classList.contains('active') || document.getElementById('pengembalian').classList.contains('active')) {
+                                showPage('home');
+                            }
+                        },
+                        { confirmButtonClass: 'btn-danger', confirmButtonText: 'Ya, Logout' }
+                    );
+                } else {
+                    const modal = document.getElementById('custom-modal');
+                    const modalContent = modal.querySelector('.modal-content');
+                    const titleEl = document.getElementById('modal-title');
+                    const bodyEl = document.getElementById('modal-body');
+                    const confirmBtn = document.getElementById('modal-confirm-btn');
+
+                    titleEl.innerHTML = '<i class="fas fa-user-shield mr-2"></i> Login Admin';
+                    bodyEl.innerHTML = `
+                        <p class="text-slate-600 mb-4">Masukkan username dan password untuk mengakses fitur admin.</p>
+                        <form id="admin-login-form" class="space-y-4">
+                            <div>
+                                <label for="admin-username" class="block text-sm font-medium text-slate-700">Username</label>
+                                <div class="relative mt-1">
+                                    <input type="text" id="admin-username" class="form-input" required autocomplete="username">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="admin-password" class="block text-sm font-medium text-slate-700">Password</label>
+                                <div class="relative mt-1">
+                                    <input type="password" id="admin-password" class="form-input pr-10" required autocomplete="current-password">
+                                    <span id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-slate-400 hover:text-sky-600">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <p id="login-error-msg" class="text-red-500 text-sm mt-2 hidden">Username atau Password salah!</p>
+                        </form>
+                    `;
+                    
+                    confirmBtn.classList.remove('hidden');
+                    confirmBtn.textContent = 'Login';
+                    confirmBtn.className = 'btn btn-primary';
+
+                    const usernameInput = bodyEl.querySelector('#admin-username');
+                    const passwordInput = bodyEl.querySelector('#admin-password');
+                    const togglePassword = bodyEl.querySelector('#toggle-password');
+                    
+                    togglePassword.addEventListener('click', () => {
+                        const isPassword = passwordInput.getAttribute('type') === 'password';
+                        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                        togglePassword.querySelector('i').classList.toggle('fa-eye', !isPassword);
+                        togglePassword.querySelector('i').classList.toggle('fa-eye-slash', isPassword);
+                    });
+                    
+                    const newConfirmBtn = confirmBtn.cloneNode(true);
+                    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                    const submitLogin = () => {
+                        const username = usernameInput.value;
+                        const password = passwordInput.value;
+                        const errorMsg = bodyEl.querySelector('#login-error-msg');
+                        
+                        // Validasi username dan password
+                        // For demonstration purposes, hardcoded credentials. 
+                        // In a real application, you'd verify against a secure backend.
+                        if (username === "admin" && password === "admin123") { 
+                            isAdmin = true;
+                            hideModal();
+                            setTimeout(() => {
+                                showModal("Login Berhasil", "Selamat datang, Admin! Anda sekarang dapat menyetujui/menolak pengajuan.");
+                            }, 300);
+                            updateAdminButtonUI();
+                            if (lastIzinSnapshot) {
+                                renderIzinHistory(lastIzinSnapshot);
+                            }
+                            loadUserPeminjaman(); 
+                            loadAsisten(); // <-- [MODIFIKASI]
+                        } else {
+                            errorMsg.classList.remove('hidden');
+                            usernameInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                            passwordInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                            modalContent.classList.add('shake-animation');
+                            setTimeout(() => modalContent.classList.remove('shake-animation'), 500);
+                        }
+                    };
+
+                    newConfirmBtn.addEventListener('click', submitLogin);
+                    bodyEl.querySelector('#admin-login-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        submitLogin();
+                    });
+
+                    modal.classList.remove('hidden');
+                    usernameInput.focus();
+                }
+            }
+
+            async function kembalikanAlat(peminjamanId, alatId) {
+                showModal("Konfirmasi", "Apakah Anda yakin ingin mengembalikan alat ini?", async () => {
+                    const peminjamanRef = doc(db, `/artifacts/${appId}/public/data/peminjaman`, peminjamanId);
+                    // The original code uses a static inventoryData.
+                    // To actually update the count in a real system, you would fetch the current item from Firestore.
+                    // const inventarisRef = doc(db, `/artifacts/${appId}/public/data/inventory`, alatId);
+                    try {
+                        await updateDoc(peminjamanRef, { status: 'Dikembalikan', tanggalKembali: serverTimestamp() });
+                        // In a real app, you would update the actual inventory in Firestore:
+                        // const inventarisSnap = await getDoc(inventarisRef);
+                        // if (inventarisSnap.exists()) {
+                        //     await updateDoc(inventarisRef, { tersedia: inventarisSnap.data().tersedia + 1 });
+                        // }
+                        showModal("Sukses", "Alat berhasil dikembalikan.");
+                        loadInventoryAndPinjamOptions(); // Reload inventory and pinjam options after return
+                        loadUserPeminjaman(); 
+                    } catch (error) { showModal("Error", "Gagal mengembalikan alat: " + error.message); console.error(error); }
+                }, { confirmButtonClass: 'btn-success', confirmButtonText: 'Ya, Kembalikan' });
+            }
+
+
+            document.getElementById('form-peminjaman').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const selectElement = document.getElementById('pinjam-alat');
+                const alatId = selectElement.value;
+                const namaAlat = selectElement.selectedOptions[0].dataset.nama;
+                const currentTersedia = parseInt(selectElement.selectedOptions[0].dataset.tersedia);
+                const namaPeminjam = document.getElementById('pinjam-nama').value;
+                const nimPeminjam = document.getElementById('pinjam-nim').value;
+                const keperluan = document.getElementById('pinjam-keperluan').value;
+
+                if (!alatId || !namaPeminjam || !nimPeminjam || !keperluan) {
+                    return showModal("Error", "Harap isi semua kolom.");
+                }
+
+                if (currentTersedia <= 0) {
+                    return showModal("Peringatan", `Maaf, ${namaAlat} tidak tersedia saat ini.`);
+                }
+
+                const peminjamanData = { 
+                    alatId, 
+                    namaAlat, 
+                    peminjamId: userId, // Keep peminjamId for tracking who borrowed it even if admin does the action
+                    namaPeminjam, 
+                    nimPeminjam,
+                    keperluan, 
+                    tanggalPinjam: serverTimestamp(), 
+                    status: 'Dipinjam' 
+                };
+
+                try {
+                    // Add the borrowing record
+                    await addDoc(collection(db, `/artifacts/${appId}/public/data/peminjaman`), peminjamanData);
+
+                    // Decrement the 'tersedia' count in the inventory
+                    // This part should be implemented to interact with your actual inventory data in Firestore.
+                    // For now, it's just a placeholder as your inventory data is static in JS.
+                    // const inventarisRef = doc(db, `/artifacts/${appId}/public/data/inventory`, alatId);
+                    // await updateDoc(inventarisRef, { tersedia: currentTersedia - 1 });
+
+                    showModal("Sukses", `Peminjaman berhasil diajukan. Jumlah tersedia untuk ${namaAlat} telah diperbarui.`);
+                    e.target.reset();
+                    // Reload inventory data to update the select options and table
+                    loadInventoryAndPinjamOptions();
+                    // Reload user/admin peminjaman list
+                    loadUserPeminjaman(); 
+                } catch (error) { 
+                    showModal("Error", "Gagal mengajukan peminjaman: " + error.message); 
+                    console.error(error); 
+                }
+            });
+
+            document.getElementById('form-izin').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const judul = document.getElementById('izin-judul').value;
+                const pembimbing = document.getElementById('izin-pembimbing').value;
+                const deskripsi = document.getElementById('izin-deskripsi').value;
+                if (!pembimbing) {
+                    showModal("Error", "Harap pilih nama pembimbing.");
+                    return;
+                }
+                try { 
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/izinKerja`), { judul, pembimbing, deskripsi, tanggalPengajuan: serverTimestamp(), status: 'Diajukan' }); 
+                    showModal("Sukses", "Pengajuan izin berhasil dikirim."); e.target.reset(); 
+                }
+                catch (error) { showModal("Error", "Gagal mengirim pengajuan izin: " + error.message); console.error(error); }
+            }); 
+            document.getElementById('form-logbook').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                // === [MODIFIED] Get name from the new input field ===
+                const nama = document.getElementById('logbook-nama').value;
+                const kegiatan = document.getElementById('logbook-kegiatan').value;
+                
+                if (!nama || !kegiatan) {
+                    showModal("Peringatan", "Nama dan Deskripsi Kegiatan wajib diisi.");
+                    return;
+                }
+                
+                try { 
+                    // === [MODIFIED] Add name to the saved data ===
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/logbook`), { nama, kegiatan, timestamp: serverTimestamp() }); 
+                    showModal("Sukses", "Catatan logbook berhasil disimpan."); 
+                    e.target.reset(); 
+                }
+                catch (error) { showModal("Error", "Gagal menyimpan catatan logbook: " + error.message); console.error(error); }
+            });
+
+            // Initial data loads
+            loadDosen(); 
+            loadAsisten(); 
+            loadDokumentasi(); 
+            loadAlumni(); 
+            loadInventoryAndPinjamOptions(); 
+            loadUserPeminjaman(); 
+            loadIzinHistory(); 
+            loadLogbookHistory();
+
+            // [BARU] Panggil fungsi inisialisasi presensi yang baru
+            initializePresensiPage(db, userId);
+
+            document.getElementById('admin-login-btn').addEventListener('click', handleAdminLogin);
+
+            // [TAMBAHKAN] Event listeners untuk CRUD Asisten
+            document.getElementById('btn-tambah-asisten').addEventListener('click', () => {
+                showAsistenModal();
+            });
+
+            const asistenContainer = document.getElementById('asisten-list-container');
+            asistenContainer.addEventListener('click', (e) => {
+                const editButton = e.target.closest('.js-edit-asisten');
+                if (editButton) {
+                    const docId = editButton.dataset.id;
+                    const asistenData = JSON.parse(editButton.dataset.asisten);
+                    showAsistenModal(asistenData, docId);
+                }
+
+                const deleteButton = e.target.closest('.js-delete-asisten');
+                if (deleteButton) {
+                    const docId = deleteButton.dataset.id;
+                    const nama = deleteButton.dataset.nama;
+                    deleteAsisten(docId, nama);
+                }
+            });
+        }
+
+        // =====================================================================
+        // NEW SIDEBAR COLLAPSE / EXPAND LOGIC (Revised)
+        // =====================================================================
+        const sidebar = document.querySelector('aside');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+        const overlay = document.getElementById('overlay'); // Get the new overlay element
+
+        function toggleSidebar() {
+            if (sidebar.classList.contains('expanded')) {
+                // Collapse sidebar
+                sidebar.classList.remove('expanded');
+                document.body.classList.remove('sidebar-expanded');
+                hamburgerBtn.classList.remove('hidden'); // Show hamburger button
+                sidebarCloseBtn.classList.add('hidden'); // Hide close button
+                overlay.style.display = 'none'; // Hide overlay
+            } else {
+                // Expand sidebar
+                sidebar.classList.add('expanded');
+                document.body.classList.add('sidebar-expanded');
+                hamburgerBtn.classList.add('hidden'); // Hide hamburger button
+                sidebarCloseBtn.classList.remove('hidden'); // Show close button
+                overlay.style.display = 'block'; // Show overlay
+            }
+        }
+
+        // Event listeners for toggle buttons and overlay
+        hamburgerBtn.addEventListener('click', toggleSidebar);
+        sidebarCloseBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar); // Close sidebar when overlay is clicked
+
+        // Initial state: sidebar collapsed, hamburger visible, close button hidden, overlay hidden
+        // (These are set by default in CSS and HTML but re-emphasized here for clarity)
+        sidebar.classList.remove('expanded'); 
+        document.body.classList.remove('sidebar-expanded');
+        hamburgerBtn.classList.remove('hidden');
+        sidebarCloseBtn.classList.add('hidden');
+        overlay.style.display = 'none';
+
+    </script>
+</body>
+</html>
